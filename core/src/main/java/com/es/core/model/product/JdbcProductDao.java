@@ -2,30 +2,26 @@ package com.es.core.model.product;
 
 import com.es.core.model.phone.Color;
 import com.es.core.model.phone.Phone;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Component
 public class JdbcProductDao implements ProductDao {
   public static final String INSERT_INTO_PHONE_2_COLOR = "INSERT INTO phone2color(phoneId, colorId) VALUES(?, ?)";
-  public static final String INSERT_INTO_PHONES = "INSERT INTO phones(brand, model, price, displaySizeInches, weightGr, " +
-          "lengthMm, widthMm, heightMm, announced, deviceType, os, displayResolution, pixelDensity, displayTechnology, " +
-          "backCameraMegapixels, frontCameraMegapixels, ramGb, internalStorageGb, batteryCapacityMah, talkTimeHours, " +
-          "standByTimeHours, bluetooth, positioning, imageUrl, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?," +
-          "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   public static final String UPDATE_PHONE = "UPDATE phones SET brand = ?, model = ?, price = ?, displaySizeInches = ?, " +
           "weightGr = ?, lengthMm = ?, widthMm = ?, heightMm = ?, announced = ?, deviceType = ?, os = ?, " +
           "displayResolution = ?, pixelDensity = ?, displayTechnology = ?, backCameraMegapixels = ?, " +
@@ -40,9 +36,12 @@ public class JdbcProductDao implements ProductDao {
   public static final String SELECT_FROM_PHONES_OFFSET_LIMIT = "SELECT * FROM phones OFFSET ? LIMIT ?";
   public static final String PHONES_TABLE = "phones";
   public static final String PHONES_TABLE_ID_COLUMN = "id";
+
   private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
   @Resource
   private JdbcTemplate jdbcTemplate;
+
   private SimpleJdbcInsert simpleJdbcInsert;
 
   @PostConstruct
@@ -79,7 +78,8 @@ public class JdbcProductDao implements ProductDao {
     readWriteLock.readLock().lock();
     List<Phone> phones;
     try {
-      phones = jdbcTemplate.query(SELECT_FROM_PHONES_OFFSET_LIMIT, new BeanPropertyRowMapper<>(Phone.class), offset, limit);
+      phones = jdbcTemplate.query(SELECT_FROM_PHONES_OFFSET_LIMIT,
+              new BeanPropertyRowMapper<>(Phone.class), offset, limit);
       phones.forEach(this::setColors);
     } finally {
       readWriteLock.readLock().unlock();
@@ -92,8 +92,8 @@ public class JdbcProductDao implements ProductDao {
     readWriteLock.writeLock().lock();
     try {
       if (phone != null && phone.getBrand() != null && phone.getModel() != null) {
-        Long id = getPhoneId(phone);
-        if (id != null) {
+        Optional<Long> id = getPhoneId(phone);
+        if (id.isPresent()) {
           update(phone);
         } else {
           addPhone(phone);
@@ -107,22 +107,33 @@ public class JdbcProductDao implements ProductDao {
     }
   }
 
-  private Long getPhoneId(Phone phone) {
+  private Optional<Long> getPhoneId(Phone phone) {
     List<Long> phones = jdbcTemplate.queryForList(SELECT_PHONE_ID_BY_BRAND_AND_MODEL,
             Long.class, phone.getBrand(), phone.getModel());
-    Long id = phones.isEmpty() ? null : phones.get(0);
-    return id;
+    return phones.isEmpty() ? Optional.empty() : Optional.of(phones.get(0));
   }
 
   private void addPhone(Phone phone) {
     SqlParameterSource source = new BeanPropertySqlParameterSource(phone);
-    Long num = (Long) simpleJdbcInsert.executeAndReturnKey(source);
-    phone.setId(num);
+    Long id = (Long) simpleJdbcInsert.executeAndReturnKey(source);
+    phone.setId(id);
   }
 
   private void addColors(Phone phone) {
-    if (phone.getColors() != null && !phone.getColors().isEmpty()) {
-      phone.getColors().forEach(color -> jdbcTemplate.update(INSERT_INTO_PHONE_2_COLOR, phone.getId(), color.getId()));
+    if (CollectionUtils.isEmpty(phone.getColors())) {
+      List<Color> colors = new ArrayList<>(phone.getColors());
+      jdbcTemplate.batchUpdate(INSERT_INTO_PHONE_2_COLOR, new BatchPreparedStatementSetter() {
+        @Override
+        public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+          preparedStatement.setLong(1, phone.getId());
+          preparedStatement.setLong(2, colors.get(i).getId());
+        }
+
+        @Override
+        public int getBatchSize() {
+          return colors.size();
+        }
+      });
     }
   }
 
@@ -131,9 +142,9 @@ public class JdbcProductDao implements ProductDao {
     readWriteLock.writeLock().lock();
     try {
       if (phone != null && phone.getBrand() != null && phone.getModel() != null) {
-        Long id = getPhoneId(phone);
-        if (id != null) {
-          phone.setId(id);
+        Optional<Long> id = getPhoneId(phone);
+        if (id.isPresent()) {
+          phone.setId(id.get());
           jdbcTemplate.update(UPDATE_PHONE, phone.getBrand(), phone.getModel(), phone.getPrice(),
                   phone.getDisplaySizeInches(), phone.getWeightGr(), phone.getLengthMm(), phone.getWidthMm(),
                   phone.getHeightMm(), phone.getAnnounced(), phone.getDeviceType(), phone.getOs(),
