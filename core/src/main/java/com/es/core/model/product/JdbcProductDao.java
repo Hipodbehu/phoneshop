@@ -108,9 +108,9 @@ public class JdbcProductDao implements ProductDao {
   }
 
   private Optional<Long> getPhoneId(Phone phone) {
-    List<Long> phones = jdbcTemplate.queryForList(SELECT_PHONE_ID_BY_BRAND_AND_MODEL,
+    List<Long> ids = jdbcTemplate.queryForList(SELECT_PHONE_ID_BY_BRAND_AND_MODEL,
             Long.class, phone.getBrand(), phone.getModel());
-    return phones.isEmpty() ? Optional.empty() : Optional.of(phones.get(0));
+    return ids.isEmpty() ? Optional.empty() : Optional.of(ids.get(0));
   }
 
   private void addPhone(Phone phone) {
