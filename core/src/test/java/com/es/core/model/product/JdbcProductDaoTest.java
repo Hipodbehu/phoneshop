@@ -68,14 +68,14 @@ public class JdbcProductDaoTest {
   public void shouldThrowInvalidProductExceptionWhenSavePhoneNoBrand() {
     Phone phone = new Phone();
     phone.setModel(MODEL);
-    jdbcProductDao.save(null);
+    jdbcProductDao.save(phone);
   }
 
   @Test(expected = InvalidProductException.class)
   public void shouldThrowInvalidProductExceptionWhenSavePhoneNoModel() {
     Phone phone = new Phone();
     phone.setBrand(BRAND);
-    jdbcProductDao.save(null);
+    jdbcProductDao.save(phone);
   }
 
   @Test

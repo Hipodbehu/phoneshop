@@ -15,7 +15,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -33,7 +37,7 @@ public class JdbcProductDao implements ProductDao {
   public static final String SELECT_PHONE_BY_ID_FROM_PHONES = "SELECT * FROM phones WHERE id = ?";
   public static final String SELECT_COLOR_BY_PHONE_ID_FROM_COLORS = "SELECT id, code FROM colors " +
           "JOIN phone2color ON phone2color.colorId = colors.id WHERE phone2color.phoneId = ?";
-  public static final String SELECT_FROM_PHONES_OFFSET_LIMIT = "SELECT * FROM phones OFFSET ? LIMIT ?";
+  public static final String SELECT_FROM_PHONES_OFFSET_LIMIT = "SELECT * FROM phones WHERE stock > 0 OFFSET ? LIMIT ? ";
   public static final String PHONES_TABLE = "phones";
   public static final String PHONES_TABLE_ID_COLUMN = "id";
 
