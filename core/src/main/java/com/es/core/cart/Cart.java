@@ -1,4 +1,90 @@
 package com.es.core.cart;
 
-public class Cart {
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Cart implements Serializable, Cloneable {
+  private List<CartItem> itemList;
+  private int totalQuantity;
+  private BigDecimal totalCost;
+  private BigDecimal deliveryCost;
+
+  public Cart() {
+    this.itemList = new ArrayList<>();
+    this.totalQuantity = 0;
+    this.totalCost = BigDecimal.ZERO;
+    this.deliveryCost = BigDecimal.ZERO;
+  }
+
+  public List<CartItem> getItemList() {
+    return itemList;
+  }
+
+  public void addItem(CartItem item) {
+    this.itemList.add(item);
+  }
+
+  public int getTotalQuantity() {
+    return totalQuantity;
+  }
+
+  public void setTotalQuantity(int totalQuantity) {
+    this.totalQuantity = totalQuantity;
+  }
+
+  public BigDecimal getTotalCost() {
+    return totalCost;
+  }
+
+  public void setTotalCost(BigDecimal totalCost) {
+    this.totalCost = totalCost;
+  }
+
+  public BigDecimal getDeliveryCost() {
+    return deliveryCost;
+  }
+
+  public void setDeliveryCost(BigDecimal deliveryCost) {
+    this.deliveryCost = deliveryCost;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Cart cart = (Cart) o;
+
+    if (totalQuantity != cart.totalQuantity) return false;
+    if (itemList != null ? !itemList.equals(cart.itemList) : cart.itemList != null) return false;
+    if (totalCost != null ? !totalCost.equals(cart.totalCost) : cart.totalCost != null) return false;
+    return deliveryCost != null ? deliveryCost.equals(cart.deliveryCost) : cart.deliveryCost == null;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = itemList != null ? itemList.hashCode() : 0;
+    result = 31 * result + totalQuantity;
+    result = 31 * result + (totalCost != null ? totalCost.hashCode() : 0);
+    result = 31 * result + (deliveryCost != null ? deliveryCost.hashCode() : 0);
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("Cart{");
+    sb.append("itemList=").append(itemList);
+    sb.append(", totalQuantity=").append(totalQuantity);
+    sb.append(", totalCost=").append(totalCost);
+    sb.append(", deliveryCost=").append(deliveryCost);
+    sb.append('}');
+    return sb.toString();
+  }
+
+  @Override
+  protected Object clone() throws CloneNotSupportedException {
+    return super.clone();
+  }
 }

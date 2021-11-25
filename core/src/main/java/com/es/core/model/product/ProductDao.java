@@ -8,7 +8,11 @@ import java.util.Optional;
 public interface ProductDao {
   Optional<Phone> find(Long key);
 
-  List<Phone> findAll(int offset, int limit);
+  List<Phone> findAll(String query, String order, String orderDirection, int offset, int limit);
+
+  Integer getCount(String query);
+
+  Integer getStock(Long id);
 
   void save(Phone phone);
 

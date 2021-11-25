@@ -1,0 +1,32 @@
+function addToCart(phoneId) {
+    var quantity = $('#quantity-' + phoneId).val();
+    var addButtonId = '#addButton-' + phoneId;
+    var quantityMessageId = '#quantityMessage-' + phoneId;
+    $(document).ready(function () {
+        $.post('/phoneshop-web/ajaxCart', {
+            phoneId: phoneId,
+            quantity: quantity
+        }).done(function (data) {
+            if (data.successful) {
+                $(quantityMessageId).text(data.message).css({'color': 'green'});
+            } else {
+                $(quantityMessageId).text(data.message).css({'color': 'red'});
+            }
+            loadMiniCart(data.miniCart)
+        }).always(function () {
+            $(addButtonId).prop("disabled", false);
+        })
+    })
+}
+
+function getMiniCart() {
+    $(document).ready(function () {
+        $.get('/phoneshop-web/ajaxCart', function (data) {
+            loadMiniCart(data)
+        })
+    });
+}
+
+function loadMiniCart(miniCart) {
+    $("#miniCart").text("My cart: " + miniCart.totalQuantity + " items " + miniCart.totalCost + " $");
+}
