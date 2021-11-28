@@ -2,6 +2,7 @@ package com.es.core.model.product;
 
 import com.es.core.model.phone.Color;
 import com.es.core.model.phone.Phone;
+import com.es.core.model.phone.Stock;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,10 +44,12 @@ public class JdbcProductDao implements ProductDao {
   public static final String SELECT_COUNT_FROM_PHONES = "SELECT COUNT(*) FROM phones " +
           "JOIN stocks ON stocks.phoneId = phones.id WHERE stocks.stock > 0 " +
           "AND phones.price IS NOT NULL AND (phones.brand LIKE ? OR phones.model LIKE ?)";
-  public static final String SELECT_STOCK_FROM_STOCKS_BY_ID = "SELECT stocks.stock FROM stocks " +
+  public static final String SELECT_STOCK_FROM_STOCKS_BY_ID = "SELECT stocks.* FROM stocks " +
           "JOIN phones ON stocks.phoneId = phones.id WHERE phones.id = ?";
   public static final String PHONES_TABLE = "phones";
   public static final String PHONES_TABLE_ID_COLUMN = "id";
+  public static final String UPDATE_STOCK = "";
+  public static final String PERCENT = "%";
 
   private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -89,7 +92,7 @@ public class JdbcProductDao implements ProductDao {
     readWriteLock.readLock().lock();
     List<Phone> phones;
     try {
-      query = "%" + query.trim() + "%";
+      query = buildQuery(query);
       phones = jdbcTemplate.query(String.format(SELECT_ALL_FROM_PHONES_OFFSET_LIMIT, order, orderDirection),
               new BeanPropertyRowMapper<>(Phone.class), query, query, offset, limit);
       phones.forEach(this::setColors);
@@ -99,12 +102,20 @@ public class JdbcProductDao implements ProductDao {
     return phones;
   }
 
+  private String buildQuery(String query) {
+    StringBuilder queryBuilder = new StringBuilder();
+    queryBuilder.append(PERCENT)
+            .append(query.trim())
+            .append(PERCENT);
+    return queryBuilder.toString();
+  }
+
   @Override
   public Integer getCount(String query) {
     readWriteLock.readLock().lock();
     Integer count;
     try {
-      query = "%" + query.trim() + "%";
+      query = buildQuery(query);
       count = jdbcTemplate.queryForObject(SELECT_COUNT_FROM_PHONES,
               Integer.class, query, query);
     } finally {
@@ -114,17 +125,29 @@ public class JdbcProductDao implements ProductDao {
   }
 
   @Override
-  public Integer getStock(Long id) {
+  public Optional<Stock> getStock(Long id) {
     readWriteLock.readLock().lock();
-    Integer count;
+    Optional<Stock> stock;
     try {
-      count = jdbcTemplate.queryForObject(SELECT_STOCK_FROM_STOCKS_BY_ID,
-              Integer.class, id);
+      Optional<Phone> phone = find(id);
+      if (phone.isPresent()) {
+        List<Stock> stocks = jdbcTemplate.query(SELECT_STOCK_FROM_STOCKS_BY_ID,
+                new BeanPropertyRowMapper<>(Stock.class), id);
+        if (stocks.isEmpty()) {
+          stock = Optional.empty();
+        } else {
+          stocks.get(0).setPhone(phone.get());
+          stock = Optional.of(stocks.get(0));
+        }
+      } else {
+        stock = Optional.empty();
+      }
     } finally {
       readWriteLock.readLock().unlock();
     }
-    return count;
+    return stock;
   }
+
 
   @Override
   public void save(Phone phone) throws InvalidProductException {

@@ -57,5 +57,5 @@
             </c:forEach>
         </table>
     </div>
-    <tags:pagination phonesPageNumber="${phonesPageNumber}"/>
+    <tags:pagination phonesPageNumber="${phonesPageNumber}" page="${pageNumber}"/>
 </tags:master>

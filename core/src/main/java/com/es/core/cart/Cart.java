@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Cart implements Serializable, Cloneable {
   private List<CartItem> itemList;
@@ -54,22 +55,16 @@ public class Cart implements Serializable, Cloneable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     Cart cart = (Cart) o;
-
-    if (totalQuantity != cart.totalQuantity) return false;
-    if (itemList != null ? !itemList.equals(cart.itemList) : cart.itemList != null) return false;
-    if (totalCost != null ? !totalCost.equals(cart.totalCost) : cart.totalCost != null) return false;
-    return deliveryCost != null ? deliveryCost.equals(cart.deliveryCost) : cart.deliveryCost == null;
+    return totalQuantity == cart.totalQuantity
+            && Objects.equals(itemList, cart.itemList)
+            && Objects.equals(totalCost, cart.totalCost)
+            && Objects.equals(deliveryCost, cart.deliveryCost);
   }
 
   @Override
   public int hashCode() {
-    int result = itemList != null ? itemList.hashCode() : 0;
-    result = 31 * result + totalQuantity;
-    result = 31 * result + (totalCost != null ? totalCost.hashCode() : 0);
-    result = 31 * result + (deliveryCost != null ? deliveryCost.hashCode() : 0);
-    return result;
+    return Objects.hash(itemList, totalQuantity, totalCost, deliveryCost);
   }
 
   @Override

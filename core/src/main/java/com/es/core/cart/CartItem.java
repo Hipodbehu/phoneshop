@@ -3,6 +3,7 @@ package com.es.core.cart;
 import com.es.core.model.phone.Phone;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class CartItem implements Serializable, Cloneable {
   private Phone phone;
@@ -33,17 +34,13 @@ public class CartItem implements Serializable, Cloneable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     CartItem cartItem = (CartItem) o;
-
-    return phone != null ? phone.equals(cartItem.phone) : cartItem.phone == null;
+    return quantity == cartItem.quantity && Objects.equals(phone, cartItem.phone);
   }
 
   @Override
   public int hashCode() {
-    int result = phone != null ? phone.hashCode() : 0;
-    result = 31 * result + quantity;
-    return result;
+    return Objects.hash(phone, quantity);
   }
 
   @Override

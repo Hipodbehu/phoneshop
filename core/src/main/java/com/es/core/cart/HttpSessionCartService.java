@@ -1,7 +1,8 @@
 package com.es.core.cart;
 
-import com.es.core.model.phone.Phone;
+import com.es.core.model.phone.Stock;
 import com.es.core.model.product.ProductDao;
+import com.es.core.model.product.ProductNotFoundException;
 import com.es.core.order.OutOfStockException;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,6 @@ import java.util.concurrent.locks.ReentrantLock;
 @Service
 public class HttpSessionCartService implements CartService {
   public static final String CART_SESSION_ATTRIBUTE = HttpSessionCartService.class.getName() + ".cart";
-  public static final String OUT_OF_STOCK_MESSAGE = "Stock is less. Stock: %d";
 
   @Resource
   private ProductDao productDao;
@@ -48,12 +48,11 @@ public class HttpSessionCartService implements CartService {
   public void addPhone(Cart cart, Long phoneId, Integer quantity) throws OutOfStockException {
     lock.lock();
     try {
-      Phone phone = productDao.find(phoneId).get();
-      int stock = productDao.getStock(phoneId);
-      if (quantity > stock) {
-        throw new OutOfStockException(String.format(OUT_OF_STOCK_MESSAGE, stock));
+      Stock stock = productDao.getStock(phoneId).orElseThrow(ProductNotFoundException::new);
+      if (quantity > stock.getStock() - stock.getReserved()) {
+        throw new OutOfStockException();
       } else {
-        CartItem cartItem = new CartItem(phone, quantity);
+        CartItem cartItem = new CartItem(stock.getPhone(), quantity);
         cart.addItem(cartItem);
         recalculateCart(cart);
       }

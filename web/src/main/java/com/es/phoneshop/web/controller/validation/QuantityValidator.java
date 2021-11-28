@@ -7,7 +7,9 @@ import org.springframework.validation.Validator;
 @Service
 public class QuantityValidator implements Validator {
   public static final String QUANTITY_FIELD = "quantity";
-  public static final String ERROR_MESSAGE = "Not a number";
+  public static final String FORMAT_ERROR_MESSAGE = "Not a number";
+  public static final String BAD_QUANTITY_ERROR_MESSAGE = "Cannot be less than ";
+  public static final int MINIMAL_QUANTITY = 1;
 
   @Override
   public boolean supports(Class<?> aClass) {
@@ -18,9 +20,12 @@ public class QuantityValidator implements Validator {
   public void validate(Object o, Errors errors) {
     QuantityInputWrapper quantityInputWrapper = (QuantityInputWrapper) o;
     try {
-      Integer.parseInt(quantityInputWrapper.getQuantity());
+      int quantity = Integer.parseInt(quantityInputWrapper.getQuantity());
+      if (quantity < MINIMAL_QUANTITY) {
+        errors.rejectValue(QUANTITY_FIELD, BAD_QUANTITY_ERROR_MESSAGE, BAD_QUANTITY_ERROR_MESSAGE + MINIMAL_QUANTITY);
+      }
     } catch (NumberFormatException e) {
-      errors.rejectValue(QUANTITY_FIELD, ERROR_MESSAGE, ERROR_MESSAGE);
+      errors.rejectValue(QUANTITY_FIELD, FORMAT_ERROR_MESSAGE, FORMAT_ERROR_MESSAGE);
     }
   }
 }

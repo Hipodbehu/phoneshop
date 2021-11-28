@@ -1,6 +1,7 @@
 package com.es.core.model.product;
 
 import com.es.core.model.phone.Phone;
+import com.es.core.model.phone.Stock;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +13,7 @@ public interface ProductDao {
 
   Integer getCount(String query);
 
-  Integer getStock(Long id);
+  Optional<Stock> getStock(Long id);
 
   void save(Phone phone);
 

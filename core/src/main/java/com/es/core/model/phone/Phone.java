@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 
 public class Phone implements Serializable {
@@ -278,14 +279,12 @@ public class Phone implements Serializable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     Phone phone = (Phone) o;
-
-    return id != null ? id.equals(phone.id) : phone.id == null;
+    return Objects.equals(id, phone.id);
   }
 
   @Override
   public int hashCode() {
-    return id != null ? id.hashCode() : 0;
+    return Objects.hash(id);
   }
 }
