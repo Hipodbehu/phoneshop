@@ -2,6 +2,7 @@ package com.es.core.model.product;
 
 import com.es.core.model.phone.Color;
 import com.es.core.model.phone.Phone;
+import com.es.core.model.phone.Stock;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,11 +16,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Optional;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -37,9 +38,18 @@ public class JdbcProductDao implements ProductDao {
   public static final String SELECT_PHONE_BY_ID_FROM_PHONES = "SELECT * FROM phones WHERE id = ?";
   public static final String SELECT_COLOR_BY_PHONE_ID_FROM_COLORS = "SELECT id, code FROM colors " +
           "JOIN phone2color ON phone2color.colorId = colors.id WHERE phone2color.phoneId = ?";
-  public static final String SELECT_FROM_PHONES_OFFSET_LIMIT = "SELECT * FROM phones WHERE stock > 0 OFFSET ? LIMIT ? ";
+  public static final String SELECT_ALL_FROM_PHONES_OFFSET_LIMIT = "SELECT phones.* FROM phones " +
+          "JOIN stocks ON stocks.phoneId = phones.id WHERE stocks.stock > 0 AND phones.price IS NOT NULL AND " +
+          "(phones.brand LIKE ? OR phones.model LIKE ?) ORDER BY phones.%s %s OFFSET ? LIMIT ? ";
+  public static final String SELECT_COUNT_FROM_PHONES = "SELECT COUNT(*) FROM phones " +
+          "JOIN stocks ON stocks.phoneId = phones.id WHERE stocks.stock > 0 " +
+          "AND phones.price IS NOT NULL AND (phones.brand LIKE ? OR phones.model LIKE ?)";
+  public static final String SELECT_STOCK_FROM_STOCKS_BY_ID = "SELECT stocks.* FROM stocks " +
+          "JOIN phones ON stocks.phoneId = phones.id WHERE phones.id = ?";
   public static final String PHONES_TABLE = "phones";
   public static final String PHONES_TABLE_ID_COLUMN = "id";
+  public static final String UPDATE_STOCK = "";
+  public static final String PERCENT = "%";
 
   private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -78,18 +88,66 @@ public class JdbcProductDao implements ProductDao {
   }
 
   @Override
-  public List<Phone> findAll(int offset, int limit) {
+  public List<Phone> findAll(String query, String order, String orderDirection, int offset, int limit) {
     readWriteLock.readLock().lock();
     List<Phone> phones;
     try {
-      phones = jdbcTemplate.query(SELECT_FROM_PHONES_OFFSET_LIMIT,
-              new BeanPropertyRowMapper<>(Phone.class), offset, limit);
+      query = buildQuery(query);
+      phones = jdbcTemplate.query(String.format(SELECT_ALL_FROM_PHONES_OFFSET_LIMIT, order, orderDirection),
+              new BeanPropertyRowMapper<>(Phone.class), query, query, offset, limit);
       phones.forEach(this::setColors);
     } finally {
       readWriteLock.readLock().unlock();
     }
     return phones;
   }
+
+  private String buildQuery(String query) {
+    StringBuilder queryBuilder = new StringBuilder();
+    queryBuilder.append(PERCENT)
+            .append(query.trim())
+            .append(PERCENT);
+    return queryBuilder.toString();
+  }
+
+  @Override
+  public Integer getCount(String query) {
+    readWriteLock.readLock().lock();
+    Integer count;
+    try {
+      query = buildQuery(query);
+      count = jdbcTemplate.queryForObject(SELECT_COUNT_FROM_PHONES,
+              Integer.class, query, query);
+    } finally {
+      readWriteLock.readLock().unlock();
+    }
+    return count;
+  }
+
+  @Override
+  public Optional<Stock> getStock(Long id) {
+    readWriteLock.readLock().lock();
+    Optional<Stock> stock;
+    try {
+      Optional<Phone> phone = find(id);
+      if (phone.isPresent()) {
+        List<Stock> stocks = jdbcTemplate.query(SELECT_STOCK_FROM_STOCKS_BY_ID,
+                new BeanPropertyRowMapper<>(Stock.class), id);
+        if (stocks.isEmpty()) {
+          stock = Optional.empty();
+        } else {
+          stocks.get(0).setPhone(phone.get());
+          stock = Optional.of(stocks.get(0));
+        }
+      } else {
+        stock = Optional.empty();
+      }
+    } finally {
+      readWriteLock.readLock().unlock();
+    }
+    return stock;
+  }
+
 
   @Override
   public void save(Phone phone) throws InvalidProductException {

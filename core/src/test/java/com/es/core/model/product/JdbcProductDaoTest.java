@@ -17,22 +17,26 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration("/applicationTestContext-core.xml")
 public class JdbcProductDaoTest {
-  public static final Long FIRST_PHONE_ID = 1001L;
-  public static final Long LAST_PHONE_ID = 1009L;
-  public static final String BRAND = "test_brand";
-  public static final String MODEL = "test_model";
+  public static final String TEST_BRAND = "test_brand";
+  public static final String TEST_MODEL = "test_model";
+  public static final String TEST_COLOR = "Test-Color";
+  public static final String BRAND = "brand";
   public static final String PHONES_TABLE = "phones";
-  public static final String COLOR_CODE = "Test-Color";
-  public static final long NOT_EXISTED_ID = 1L;
   public static final String ARCHOS_BRAND = "ARCHOS";
   public static final String ARCHOS_MODEL = "ARCHOS 28 Internet Tablet";
+  public static final Long FIRST_PHONE_ID = 1001L;
+  public static final Long LAST_PHONE_ID = 1009L;
+  public static final Long NOT_EXISTED_ID = 1L;
+  public static final String ASC = "asc";
+  public static final String EMPTY_QUERY = "";
 
   @Resource
   private JdbcProductDao jdbcProductDao;
@@ -42,16 +46,16 @@ public class JdbcProductDaoTest {
 
   @After
   public void clean() {
-    JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, PHONES_TABLE, "brand = ? AND model = ?", BRAND, MODEL);
+    JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, PHONES_TABLE, "brand = ? AND model = ?", TEST_BRAND, TEST_MODEL);
   }
 
   @Test
   public void shouldSaveWhenSavePhoneValid() {
     Phone phone = new Phone();
-    phone.setBrand(BRAND);
-    phone.setModel(MODEL);
+    phone.setBrand(TEST_BRAND);
+    phone.setModel(TEST_MODEL);
     Color color = new Color();
-    color.setCode(COLOR_CODE);
+    color.setCode(TEST_COLOR);
     phone.setColors(Stream.of(color).collect(Collectors.toSet()));
     int expectedPhonesCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, PHONES_TABLE) + 1;
     jdbcProductDao.save(phone);
@@ -67,14 +71,14 @@ public class JdbcProductDaoTest {
   @Test(expected = InvalidProductException.class)
   public void shouldThrowInvalidProductExceptionWhenSavePhoneNoBrand() {
     Phone phone = new Phone();
-    phone.setModel(MODEL);
+    phone.setModel(TEST_MODEL);
     jdbcProductDao.save(phone);
   }
 
   @Test(expected = InvalidProductException.class)
   public void shouldThrowInvalidProductExceptionWhenSavePhoneNoModel() {
     Phone phone = new Phone();
-    phone.setBrand(BRAND);
+    phone.setBrand(TEST_BRAND);
     jdbcProductDao.save(phone);
   }
 
@@ -93,7 +97,7 @@ public class JdbcProductDaoTest {
   @Test
   public void shouldGetAllPhonesWhenFindAll() {
     int expectedPhonesCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, PHONES_TABLE);
-    List<Phone> actual = jdbcProductDao.findAll(0, expectedPhonesCount);
+    List<Phone> actual = jdbcProductDao.findAll(EMPTY_QUERY, BRAND, ASC, 0, expectedPhonesCount);
     assertEquals(expectedPhonesCount, actual.size());
   }
 
@@ -112,8 +116,8 @@ public class JdbcProductDaoTest {
   public void shouldThrowProductNotFoundExceptionWhenUpdatePhoneNotExist() {
     Phone phone = new Phone();
     phone.setId(NOT_EXISTED_ID);
-    phone.setBrand(BRAND);
-    phone.setModel(MODEL);
+    phone.setBrand(TEST_BRAND);
+    phone.setModel(TEST_MODEL);
     jdbcProductDao.update(phone);
   }
 

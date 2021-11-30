@@ -1,22 +1,24 @@
 package com.es.core.model.phone;
 
-public class Color {
-    private Long id;
-    private String code;
+import java.io.Serializable;
 
-    public Long getId() {
-        return id;
-    }
+public class Color implements Serializable {
+  private Long id;
+  private String code;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public String getCode() {
-        return code;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public void setCode(final String code) {
-        this.code = code;
-    }
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(final String code) {
+    this.code = code;
+  }
 }
