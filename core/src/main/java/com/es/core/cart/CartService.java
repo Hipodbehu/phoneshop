@@ -15,7 +15,7 @@ public interface CartService {
    * @param items key: {@link com.es.core.model.phone.Phone#id}
    *              value: quantity
    */
-  void update(Map<Long, Long> items);
+  Map<Long, String> update(Cart cart, Map<Long, Integer> items);
 
-  void remove(Long phoneId);
+  void remove(Cart cart, Long phoneId);
 }
