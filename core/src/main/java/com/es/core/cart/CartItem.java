@@ -5,7 +5,7 @@ import com.es.core.model.phone.Phone;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class CartItem implements Serializable, Cloneable {
+public class CartItem implements Serializable {
   private Phone phone;
   private int quantity;
 
@@ -35,12 +35,12 @@ public class CartItem implements Serializable, Cloneable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     CartItem cartItem = (CartItem) o;
-    return quantity == cartItem.quantity && Objects.equals(phone, cartItem.phone);
+    return Objects.equals(phone, cartItem.phone);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(phone, quantity);
+    return Objects.hash(phone);
   }
 
   @Override
@@ -50,10 +50,5 @@ public class CartItem implements Serializable, Cloneable {
     sb.append(", quantity=").append(quantity);
     sb.append('}');
     return sb.toString();
-  }
-
-  @Override
-  protected Object clone() throws CloneNotSupportedException {
-    return super.clone();
   }
 }

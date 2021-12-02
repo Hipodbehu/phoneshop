@@ -22,7 +22,8 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="${pageContext.request.contextPath}/productList">Phonify</a>
             <form class="d-flex" action="${pageContext.request.contextPath}/cart">
-                <button class="btn btn-outline-success" disabled="true" type="submit" id="miniCart"></button>
+                <a class="btn btn-outline-success" type="submit" id="miniCart"
+                   href="<c:url value="/cart"/>"></a>
             </form>
         </div>
     </nav>

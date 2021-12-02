@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Cart implements Serializable, Cloneable {
+public class Cart implements Serializable {
   private List<CartItem> itemList;
   private int totalQuantity;
   private BigDecimal totalCost;
@@ -76,10 +76,5 @@ public class Cart implements Serializable, Cloneable {
     sb.append(", deliveryCost=").append(deliveryCost);
     sb.append('}');
     return sb.toString();
-  }
-
-  @Override
-  protected Object clone() throws CloneNotSupportedException {
-    return super.clone();
   }
 }

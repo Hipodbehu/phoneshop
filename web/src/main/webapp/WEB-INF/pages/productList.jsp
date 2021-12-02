@@ -38,7 +38,11 @@
                         <img src="https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/${phone.imageUrl}">
                     </td>
                     <td>${phone.brand}</td>
-                    <td>${phone.model}</td>
+                    <td>
+                        <a href="<c:url value="/productDetails/${phone.id}"/>">
+                                ${phone.model}
+                        </a>
+                    </td>
                     <td>
                         <c:forEach var="color" items="${phone.colors}">
                             ${color.code}<br/>
@@ -50,7 +54,8 @@
                         <div id="quantityMessage-${phone.id}"></div>
                     </td>
                     <td>
-                        <button class="btn-light" id="addButton-${phone.id}" onclick="addToCart(${phone.id})">Add to
+                        <button class="btn-light" id="addButton-${phone.id}" onclick="addToCart(${phone.id})">
+                            Add to
                         </button>
                     </td>
                 </tr>
