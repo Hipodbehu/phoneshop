@@ -57,7 +57,7 @@ public class HttpSessionCartService implements CartService {
         HashMap<Long, Integer> toUpdateMap = new HashMap<>();
         CartItem cartItem = optionalCartItem.get();
         toUpdateMap.put(cartItem.getPhone().getId(), cartItem.getQuantity() + quantity);
-        update(cart, toUpdateMap);
+        update(cart, toUpdateMap, new HashMap<>());
       } else {
         Stock stock = productDao.getStock(phoneId).orElseThrow(ProductNotFoundException::new);
         if (quantity > stock.getStock() - stock.getReserved()) {
@@ -101,9 +101,8 @@ public class HttpSessionCartService implements CartService {
   }
 
   @Override
-  public Map<Long, String> update(Cart cart, Map<Long, Integer> items) {
+  public void update(Cart cart, Map<Long, Integer> items, Map<Long, String> errors) {
     lock.lock();
-    HashMap<Long, String> errors = new HashMap<>();
     try {
       List<CartItem> itemList = items.keySet().stream()
               .map(phoneId -> getCartItem(cart, phoneId).orElseThrow(ProductNotFoundException::new))
@@ -125,7 +124,6 @@ public class HttpSessionCartService implements CartService {
     } finally {
       lock.unlock();
     }
-    return errors;
   }
 
   @Override

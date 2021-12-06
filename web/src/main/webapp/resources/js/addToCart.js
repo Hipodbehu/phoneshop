@@ -22,22 +22,6 @@ function addToCart(phoneId) {
             loadMiniCart(data.miniCart)
         }
     })
-
-    // $(document).ready(function () {
-    //     $.post('/phoneshop-web/ajaxCart', {
-    //         "phoneId" : phoneId,
-    //         "quantity" : quantity
-    //     }).done(function (data) {
-    //         if (data.successful) {
-    //             $(quantityMessageId).text(data.message).css({'color': 'green'});
-    //         } else {
-    //             $(quantityMessageId).text(data.message).css({'color': 'red'});
-    //         }
-    //         loadMiniCart(data.miniCart)
-    //     }).always(function () {
-    //         $(addButtonId).prop("disabled", false);
-    //     })
-    // })
 }
 
 function getMiniCart() {
