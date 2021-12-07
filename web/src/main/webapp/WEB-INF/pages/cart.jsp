@@ -2,24 +2,25 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
 <tags:master pageTitle="Cart">
     <div>
         <a class="btn btn-primary" href="<c:url value="/productList"/>">
-            Back to product list
+            <spring:message code="main.back"/>
         </a>
     </div>
     <form:form method="put">
         <div>
             <table class="table table-light table-bordered">
                 <tr>
-                    <td>Brand</td>
-                    <td>Model</td>
-                    <td>Colors</td>
-                    <td>Display size</td>
-                    <td>Price</td>
-                    <td>Quantity</td>
-                    <td>Action</td>
+                    <td><spring:message code="main.brand"/></td>
+                    <td><spring:message code="main.model"/></td>
+                    <td><spring:message code="main.colors"/></td>
+                    <td><spring:message code="main.displaySize"/></td>
+                    <td><spring:message code="main.price"/></td>
+                    <td><spring:message code="main.quantity"/></td>
+                    <td><spring:message code="main.action"/></td>
                 </tr>
                 <c:forEach var="cartItem" items="${cart.itemList}">
                     <tr>
@@ -44,7 +45,7 @@
                         <td>
                             <button type="submit" form="deleteCartItemForm"
                                     formaction="<c:url value="/cart/${cartItem.phone.id}"/>" class="btn-light">
-                                Remove
+                                <spring:message code="main.remove"/>
                             </button>
                         </td>
                     </tr>
@@ -53,7 +54,7 @@
         </div>
         <div>
             <button class="btn btn-primary" type="submit">
-                Update
+                <spring:message code="main.update"/>
             </button>
         </div>
     </form:form>

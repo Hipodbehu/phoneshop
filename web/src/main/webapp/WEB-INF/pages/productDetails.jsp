@@ -1,11 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
 <tags:master pageTitle="Product Details">
     <div>
         <a class="btn btn-primary" href="<c:url value="/productList"/>">
-            Back to product list
+            <spring:message code="main.back"/>
         </a>
     </div>
     <div>
@@ -15,86 +16,86 @@
                 ${phone.description}
         </div>
         <div>
-            <p>Price</p>
+            <p><spring:message code="main.price"/></p>
             <input id="quantity-${phone.id}" name="quantity"/>
             <div id="quantityMessage-${phone.id}"></div>
             <button class="btn-light" id="addButton-${phone.id}" onclick="addToCart(${phone.id})">
-                Add to cart
+                <spring:message code="main.addToCart"/>
             </button>
         </div>
         <div>
-            <p>Display</p>
+            <p><spring:message code="main.display"/></p>
             <table class="table table-light table-bordered">
                 <tr>
-                    <th>Size</th>
+                    <th><spring:message code="main.size"/></th>
                     <td>${phone.displaySizeInches}"</td>
                 </tr>
                 <tr>
-                    <th>Resolution</th>
+                    <th><spring:message code="main.resolution"/></th>
                     <td>${phone.displayResolution}</td>
                 </tr>
                 <tr>
-                    <th>Technology</th>
+                    <th><spring:message code="main.technology"/></th>
                     <td>${phone.displayTechnology}</td>
                 </tr>
                 <tr>
-                    <th>Pixel density</th>
+                    <th><spring:message code="main.pixelDensity"/></th>
                     <td>${phone.pixelDensity}</td>
                 </tr>
             </table>
         </div>
         <div>
-            <p>Dimensions & weight</p>
+            <p><spring:message code="main.dimensionsWeight"/></p>
             <table class="table table-light table-bordered">
                 <tr>
-                    <th>Size</th>
+                    <th><spring:message code="main.size"/></th>
                     <td>${phone.lengthMm}mm</td>
                 </tr>
                 <tr>
-                    <th>Width</th>
+                    <th><spring:message code="main.width"/></th>
                     <td>${phone.widthMm}mm</td>
                 </tr>
                 <tr>
-                    <th>Weight</th>
+                    <th><spring:message code="main.weight"/></th>
                     <td>${phone.weightGr}</td>
                 </tr>
             </table>
         </div>
         <div>
-            <p>Camera</p>
+            <p><spring:message code="main.camera"/></p>
             <table class="table table-light table-bordered">
                 <tr>
-                    <th>Front</th>
-                    <td>${phone.frontCameraMegapixels} megapixels</td>
+                    <th><spring:message code="main.front"/></th>
+                    <td>${phone.frontCameraMegapixels} <spring:message code="main.megapixels"/></td>
                 </tr>
                 <tr>
-                    <th>Back</th>
-                    <td>${phone.backCameraMegapixels} megapixels</td>
+                    <th><spring:message code="main.back"/></th>
+                    <td>${phone.backCameraMegapixels} <spring:message code="main.megapixels"/></td>
                 </tr>
             </table>
         </div>
         <div>
-            <p>Battery</p>
+            <p><spring:message code="main.battery"/></p>
             <table class="table table-light table-bordered">
                 <tr>
-                    <th>Talk time</th>
-                    <td>${phone.talkTimeHours} hours</td>
+                    <th><spring:message code="main.talkTime"/></th>
+                    <td>${phone.talkTimeHours} <spring:message code="main.hours"/></td>
                 </tr>
                 <tr>
-                    <th>Stand by time</th>
-                    <td>${phone.standByTimeHours} hours</td>
+                    <th><spring:message code="main.standByTime"/></th>
+                    <td>${phone.standByTimeHours} <spring:message code="main.hours"/></td>
                 </tr>
                 <tr>
-                    <th>Battery capacity</th>
-                    <td>${phone.batteryCapacityMah}mAh</td>
+                    <th><spring:message code="main.batteryCapacity"/></th>
+                    <td>${phone.batteryCapacityMah}<spring:message code="main.mAh"/></td>
                 </tr>
             </table>
         </div>
         <div>
-            <p>Other</p>
+            <p><spring:message code="main.other"/></p>
             <table class="table table-light table-bordered">
                 <tr>
-                    <th>Colors</th>
+                    <th><spring:message code="main.colors"/></th>
                     <td>
                         <c:forEach var="color" items="${phone.colors}">
                             ${color.code}<br/>
@@ -102,16 +103,16 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>Device type</th>
+                    <th><spring:message code="main.deviceType"/></th>
                     <td>${phone.deviceType}</td>
                 </tr>
                 <tr>
-                    <th>Bluetooth</th>
+                    <th><spring:message code="main.bluetooth"/></th>
                     <td>${phone.bluetooth}</td>
                 </tr>
                 <tr>
-                    <th>Pixel density</th>
-                    <td>Pixel density</td>
+                    <th><spring:message code="main.pixelDensity"/></th>
+                    <td>${phone.pixelDensity}</td>
                 </tr>
             </table>
         </div>
