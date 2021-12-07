@@ -2,20 +2,25 @@ function addToCart(phoneId) {
     var quantity = $('#quantity-' + phoneId).val();
     var addButtonId = '#addButton-' + phoneId;
     var quantityMessageId = '#quantityMessage-' + phoneId;
-    $(document).ready(function () {
-        $.post('/phoneshop-web/ajaxCart', {
-            phoneId: phoneId,
-            quantity: quantity
-        }).done(function (data) {
+    var id = phoneId;
+    var addProductInput = {};
+    addProductInput["id"] = id;
+    addProductInput["quantity"] = quantity;
+    $.ajax({
+        type : "POST",
+        data : JSON.stringify(addProductInput),
+        contentType : "application/json",
+        dataType : "json",
+        url : "ajaxCart",
+        async : false,
+        success: function (data) {
             if (data.successful) {
-                $(quantityMessageId).text(data.message).css({'color': 'green'});
+                            $(quantityMessageId).text(data.message).css({'color': 'green'});
             } else {
-                $(quantityMessageId).text(data.message).css({'color': 'red'});
-            }
+                            $(quantityMessageId).text(data.message).css({'color': 'red'});
+                        }
             loadMiniCart(data.miniCart)
-        }).always(function () {
-            $(addButtonId).prop("disabled", false);
-        })
+        }
     })
 }
 

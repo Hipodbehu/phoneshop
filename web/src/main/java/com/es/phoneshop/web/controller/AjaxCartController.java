@@ -5,34 +5,33 @@ import com.es.core.cart.CartService;
 import com.es.core.order.OutOfStockException;
 import com.es.phoneshop.web.controller.dto.AddPhoneResponseDto;
 import com.es.phoneshop.web.controller.dto.MiniCartDto;
-import com.es.phoneshop.web.controller.validation.QuantityInputWrapper;
+import com.es.phoneshop.web.controller.validation.AddProductInputWrapper;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.springframework.validation.Validator;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/ajaxCart")
+@RequestMapping(value = "**/ajaxCart")
 public class AjaxCartController {
-  public static final String SUCCESS_MESSAGE = "Added to cart";
   public static final String DELIMITER = "\n";
+  public static final String SUCCESS_MESSAGE = "Added to cart";
+  public static final String BAD_QUANTITY_MESSAGE = "Bad quantity";
 
   @Resource
   private CartService cartService;
-
-  @Resource
-  private Validator quantityValidator;
-
-  @InitBinder
-  private void initBinder(WebDataBinder webDataBinder) {
-    webDataBinder.setValidator(quantityValidator);
-  }
 
   @RequestMapping(method = RequestMethod.GET)
   public MiniCartDto getCart(HttpSession session) {
@@ -40,25 +39,32 @@ public class AjaxCartController {
     return createMiniCartDto(cart);
   }
 
+  @ResponseBody
   @RequestMapping(method = RequestMethod.POST)
-  public AddPhoneResponseDto addPhone(@RequestParam Long phoneId,
-                                      QuantityInputWrapper quantityInputWrapper,
-                                      HttpSession session,
-                                      BindingResult bindingResult) {
+  public AddPhoneResponseDto addPhone(@RequestBody @Valid AddProductInputWrapper productInputWrapper,
+                                      BindingResult bindingResult,
+                                      HttpSession session) {
     Cart cart = cartService.getCart(session);
-    quantityValidator.validate(quantityInputWrapper, bindingResult);
     boolean isSuccessful = true;
     if (bindingResult.hasErrors()) {
       isSuccessful = false;
     } else {
       try {
-        cartService.addPhone(cart, phoneId, Integer.parseInt(quantityInputWrapper.getQuantity()));
+        cartService.addPhone(cart, productInputWrapper.getId(), productInputWrapper.getQuantity());
       } catch (OutOfStockException exception) {
         isSuccessful = false;
-        bindingResult.addError(new ObjectError(QuantityInputWrapper.class.toString(), exception.getMessage()));
+        bindingResult.addError(new ObjectError(AddProductInputWrapper.class.toString(), exception.getMessage()));
       }
     }
     return createAddPhoneResponseDto(isSuccessful, cart, bindingResult);
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public AddPhoneResponseDto handleException(HttpSession session) {
+    BindException bindException = new BindException(HttpMessageNotReadableException.class,
+            HttpMessageNotReadableException.class.toString());
+    bindException.addError(new ObjectError(AddProductInputWrapper.class.toString(), BAD_QUANTITY_MESSAGE));
+    return createAddPhoneResponseDto(false, cartService.getCart(session), bindException.getBindingResult());
   }
 
   private AddPhoneResponseDto createAddPhoneResponseDto(boolean successful, Cart cart, BindingResult bindingResult) {

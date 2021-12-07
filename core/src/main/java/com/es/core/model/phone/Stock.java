@@ -1,11 +1,21 @@
 package com.es.core.model.phone;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Stock {
+public class Stock implements Serializable {
   private Phone phone;
   private Integer stock;
   private Integer reserved;
+
+  public Stock() {
+  }
+
+  public Stock(Phone phone, Integer stock, Integer reserved) {
+    this.phone = phone;
+    this.stock = stock;
+    this.reserved = reserved;
+  }
 
   public Phone getPhone() {
     return phone;

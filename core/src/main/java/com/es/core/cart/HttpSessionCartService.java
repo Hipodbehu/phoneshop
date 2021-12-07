@@ -10,13 +10,17 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 @Service
 public class HttpSessionCartService implements CartService {
   public static final String CART_SESSION_ATTRIBUTE = HttpSessionCartService.class.getName() + ".cart";
+  public static final String LESS_STOCK_MESSAGE = "Stock is less";
 
   @Resource
   private ProductDao productDao;
@@ -48,17 +52,31 @@ public class HttpSessionCartService implements CartService {
   public void addPhone(Cart cart, Long phoneId, Integer quantity) throws OutOfStockException {
     lock.lock();
     try {
-      Stock stock = productDao.getStock(phoneId).orElseThrow(ProductNotFoundException::new);
-      if (quantity > stock.getStock() - stock.getReserved()) {
-        throw new OutOfStockException();
+      Optional<CartItem> optionalCartItem = getCartItem(cart, phoneId);
+      if (optionalCartItem.isPresent()) {
+        HashMap<Long, Integer> toUpdateMap = new HashMap<>();
+        CartItem cartItem = optionalCartItem.get();
+        toUpdateMap.put(cartItem.getPhone().getId(), cartItem.getQuantity() + quantity);
+        update(cart, toUpdateMap, new HashMap<>());
       } else {
-        CartItem cartItem = new CartItem(stock.getPhone(), quantity);
-        cart.addItem(cartItem);
-        recalculateCart(cart);
+        Stock stock = productDao.getStock(phoneId).orElseThrow(ProductNotFoundException::new);
+        if (quantity > stock.getStock() - stock.getReserved()) {
+          throw new OutOfStockException();
+        } else {
+          CartItem cartItem = new CartItem(stock.getPhone(), quantity);
+          cart.addItem(cartItem);
+          recalculateCart(cart);
+        }
       }
     } finally {
       lock.unlock();
     }
+  }
+
+  private Optional<CartItem> getCartItem(Cart cart, Long phoneId) {
+    return cart.getItemList().stream()
+            .filter(cartItem -> cartItem.getPhone().getId().equals(phoneId))
+            .findAny();
   }
 
   private void recalculateCart(Cart cart) {
@@ -83,12 +101,42 @@ public class HttpSessionCartService implements CartService {
   }
 
   @Override
-  public void update(Map<Long, Long> items) {
-    throw new UnsupportedOperationException("TODO");
+  public void update(Cart cart, Map<Long, Integer> items, Map<Long, String> errors) {
+    lock.lock();
+    try {
+      List<CartItem> itemList = items.keySet().stream()
+              .map(phoneId -> getCartItem(cart, phoneId).orElseThrow(ProductNotFoundException::new))
+              .collect(Collectors.toList());
+      List<Stock> stocks = items.keySet().stream()
+              .map(phoneId -> productDao.getStock(phoneId).orElseThrow(ProductNotFoundException::new))
+              .collect(Collectors.toList());
+      for (int i = 0; i < stocks.size(); i++) {
+        CartItem cartItem = itemList.get(i);
+        Stock stock = stocks.get(i);
+        Integer quantity = items.get(cartItem.getPhone().getId());
+        if (quantity > stock.getStock() - stock.getReserved()) {
+          errors.put(cartItem.getPhone().getId(), LESS_STOCK_MESSAGE);
+        } else {
+          cartItem.setQuantity(quantity);
+          recalculateCart(cart);
+        }
+      }
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override
-  public void remove(Long phoneId) {
-    throw new UnsupportedOperationException("TODO");
+  public void remove(Cart cart, Long phoneId) {
+    lock.lock();
+    try {
+      Optional<CartItem> cartItem = getCartItem(cart, phoneId);
+      if (cartItem.isPresent()) {
+        cart.getItemList().remove(cartItem.get());
+      }
+      recalculateCart(cart);
+    } finally {
+      lock.unlock();
+    }
   }
 }
