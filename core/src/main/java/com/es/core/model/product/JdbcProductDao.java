@@ -32,6 +32,7 @@ public class JdbcProductDao implements ProductDao {
           "displayResolution = ?, pixelDensity = ?, displayTechnology = ?, backCameraMegapixels = ?, " +
           "frontCameraMegapixels = ?, ramGb = ?, internalStorageGb = ?, batteryCapacityMah = ?, talkTimeHours = ?, " +
           "standByTimeHours = ?, bluetooth = ?, positioning = ?, imageUrl = ?, description = ? WHERE id = ?";
+  public static final String UPDATE_STOCK = "UPDATE stocks SET stock = ?, reserved = ? WHERE phoneId = ?";
   public static final String DELETE_BY_PHONE_ID_FROM_PHONE_2_COLOR = "DELETE FROM phone2color WHERE phoneId = ?";
   public static final String DELETE_BY_ID_FROM_PHONES = "DELETE FROM phones WHERE id = ?";
   public static final String SELECT_PHONE_ID_BY_BRAND_AND_MODEL = "SELECT id FROM phones WHERE brand = ? AND model = ?";
@@ -48,7 +49,6 @@ public class JdbcProductDao implements ProductDao {
           "JOIN phones ON stocks.phoneId = phones.id WHERE phones.id = ?";
   public static final String PHONES_TABLE = "phones";
   public static final String PHONES_TABLE_ID_COLUMN = "id";
-  public static final String UPDATE_STOCK = "";
   public static final String PERCENT = "%";
 
   private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
@@ -66,12 +66,12 @@ public class JdbcProductDao implements ProductDao {
   }
 
   @Override
-  public Optional<Phone> find(Long key) {
+  public Optional<Phone> find(Long id) {
     readWriteLock.readLock().lock();
     Optional<Phone> phone;
     try {
       List<Phone> phones = jdbcTemplate.query(SELECT_PHONE_BY_ID_FROM_PHONES,
-              new BeanPropertyRowMapper<>(Phone.class), key);
+              new BeanPropertyRowMapper<>(Phone.class), id);
       phone = phones.isEmpty() ? Optional.empty() : Optional.ofNullable(phones.get(0));
       phone.ifPresent(this::setColors);
     } finally {
@@ -229,12 +229,22 @@ public class JdbcProductDao implements ProductDao {
   }
 
   @Override
-  public void delete(Long key) {
+  public void updateStock(Stock stock) {
     readWriteLock.writeLock().lock();
     try {
-      if (key != null) {
-        jdbcTemplate.update(DELETE_BY_ID_FROM_PHONES, key);
-        jdbcTemplate.update(DELETE_BY_PHONE_ID_FROM_PHONE_2_COLOR, key);
+      jdbcTemplate.update(UPDATE_STOCK, stock.getStock(), stock.getReserved(), stock.getPhone().getId());
+    } finally {
+      readWriteLock.writeLock().unlock();
+    }
+  }
+
+  @Override
+  public void delete(Long id) {
+    readWriteLock.writeLock().lock();
+    try {
+      if (id != null) {
+        jdbcTemplate.update(DELETE_BY_ID_FROM_PHONES, id);
+        jdbcTemplate.update(DELETE_BY_PHONE_ID_FROM_PHONE_2_COLOR, id);
       }
     } finally {
       readWriteLock.writeLock().unlock();

@@ -1,5 +1,7 @@
 package com.es.core.cart;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -10,6 +12,8 @@ public class Cart implements Serializable {
   private List<CartItem> itemList;
   private int totalQuantity;
   private BigDecimal totalCost;
+
+  @Value("${delivery.price}")
   private BigDecimal deliveryCost;
 
   public Cart() {

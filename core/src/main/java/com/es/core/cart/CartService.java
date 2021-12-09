@@ -17,5 +17,7 @@ public interface CartService {
    */
   void update(Cart cart, Map<Long, Integer> items, Map<Long, String> errors);
 
+  void clear(HttpSession session);
+
   void remove(Cart cart, Long phoneId);
 }

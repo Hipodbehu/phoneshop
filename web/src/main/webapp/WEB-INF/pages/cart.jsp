@@ -22,29 +22,29 @@
                     <td><spring:message code="main.quantity"/></td>
                     <td><spring:message code="main.action"/></td>
                 </tr>
-                <c:forEach var="cartItem" items="${cart.itemList}">
+                <c:forEach var="orderItem" items="${cart.itemList}">
                     <tr>
-                        <td>${cartItem.phone.brand}</td>
+                        <td>${orderItem.phone.brand}</td>
                         <td>
-                            <a href="<c:url value="/productDetails/${cartItem.phone.id}"/>">
-                                    ${cartItem.phone.model}
+                            <a href="<c:url value="/productDetails/${orderItem.phone.id}"/>">
+                                    ${orderItem.phone.model}
                             </a>
                         </td>
                         <td>
-                            <c:forEach var="color" items="${cartItem.phone.colors}">
+                            <c:forEach var="color" items="${orderItem.phone.colors}">
                                 ${color.code}<br/>
                             </c:forEach>
                         </td>
-                        <td>${cartItem.phone.displaySizeInches}"</td>
-                        <td>$ ${cartItem.phone.price}</td>
+                        <td>${orderItem.phone.displaySizeInches}"</td>
+                        <td>$ ${orderItem.phone.price}</td>
                         <td>
-                            <input name="quantityList" value="${cartItem.quantity}"/>
-                            <input type="hidden" name="idList" value="${cartItem.phone.id}">
-                            <div style="color: red">${errors[cartItem.phone.id]}</div>
+                            <input name="quantityList" value="${orderItem.quantity}"/>
+                            <input type="hidden" name="idList" value="${orderItem.phone.id}">
+                            <div style="color: red">${errors[orderItem.phone.id]}</div>
                         </td>
                         <td>
                             <button type="submit" form="deleteCartItemForm"
-                                    formaction="<c:url value="/cart/${cartItem.phone.id}"/>" class="btn-light">
+                                    formaction="<c:url value="/cart/${orderItem.phone.id}"/>" class="btn-light">
                                 <spring:message code="main.remove"/>
                             </button>
                         </td>
@@ -52,11 +52,16 @@
                 </c:forEach>
             </table>
         </div>
-        <div>
-            <button class="btn btn-primary" type="submit">
-                <spring:message code="main.update"/>
-            </button>
-        </div>
+        <c:if test="${not empty cart.itemList}">
+            <div>
+                <button class="btn btn-primary" type="submit">
+                    <spring:message code="main.update"/>
+                </button>
+                <a class="btn btn-primary" href="<c:url value="/order"/>"/>
+                <spring:message code="main.order"/>
+                </a>
+            </div>
+        </c:if>
     </form:form>
     <form:form method="delete" id="deleteCartItemForm"/>
 </tags:master>

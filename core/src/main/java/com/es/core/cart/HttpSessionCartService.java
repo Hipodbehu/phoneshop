@@ -6,7 +6,6 @@ import com.es.core.model.product.ProductNotFoundException;
 import com.es.core.order.OutOfStockException;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
@@ -22,15 +21,10 @@ public class HttpSessionCartService implements CartService {
   public static final String CART_SESSION_ATTRIBUTE = HttpSessionCartService.class.getName() + ".cart";
   public static final String LESS_STOCK_MESSAGE = "Stock is less";
 
+  private final ReentrantLock lock = new ReentrantLock();
+
   @Resource
   private ProductDao productDao;
-
-  private ReentrantLock lock;
-
-  @PostConstruct
-  private void init() {
-    lock = new ReentrantLock();
-  }
 
   @Override
   public Cart getCart(HttpSession session) {
@@ -124,6 +118,11 @@ public class HttpSessionCartService implements CartService {
     } finally {
       lock.unlock();
     }
+  }
+
+  @Override
+  public void clear(HttpSession session) {
+    session.removeAttribute(CART_SESSION_ATTRIBUTE);
   }
 
   @Override
