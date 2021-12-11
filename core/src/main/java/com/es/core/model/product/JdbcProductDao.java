@@ -40,10 +40,10 @@ public class JdbcProductDao implements ProductDao {
   public static final String SELECT_COLOR_BY_PHONE_ID_FROM_COLORS = "SELECT id, code FROM colors " +
           "JOIN phone2color ON phone2color.colorId = colors.id WHERE phone2color.phoneId = ?";
   public static final String SELECT_ALL_FROM_PHONES_OFFSET_LIMIT = "SELECT phones.* FROM phones " +
-          "JOIN stocks ON stocks.phoneId = phones.id WHERE stocks.stock > 0 AND phones.price IS NOT NULL AND " +
+          "JOIN stocks ON stocks.phoneId = phones.id WHERE stocks.stock - stocks.reserved > 0 AND phones.price IS NOT NULL AND " +
           "(phones.brand LIKE ? OR phones.model LIKE ?) ORDER BY phones.%s %s OFFSET ? LIMIT ? ";
   public static final String SELECT_COUNT_FROM_PHONES = "SELECT COUNT(*) FROM phones " +
-          "JOIN stocks ON stocks.phoneId = phones.id WHERE stocks.stock > 0 " +
+          "JOIN stocks ON stocks.phoneId = phones.id WHERE stocks.stock - stocks.reserved > 0 " +
           "AND phones.price IS NOT NULL AND (phones.brand LIKE ? OR phones.model LIKE ?)";
   public static final String SELECT_STOCK_FROM_STOCKS_BY_ID = "SELECT stocks.* FROM stocks " +
           "JOIN phones ON stocks.phoneId = phones.id WHERE phones.id = ?";

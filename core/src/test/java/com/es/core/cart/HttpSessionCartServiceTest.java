@@ -92,7 +92,7 @@ public class HttpSessionCartServiceTest {
     products.put(TEST_PHONE_IN_CART_ID, TEST_UPDATE_VALID_QUANTITY);
     BigDecimal expected = cart.getTotalCost().add(BigDecimal.valueOf(TEST_PRICE *
             (TEST_UPDATE_VALID_QUANTITY - TEST_VALID_QUANTITY)));
-    cartService.update(cart, products);
+    cartService.update(cart, products, new HashMap<>());
     BigDecimal actual = cart.getTotalCost();
     assertEquals(expected, actual);
   }
@@ -101,7 +101,8 @@ public class HttpSessionCartServiceTest {
   public void shouldNotUpdateAndReturnErrorsWhenUpdateItemInvalid() {
     HashMap<Long, Integer> products = new HashMap<>();
     products.put(TEST_PHONE_IN_CART_ID, TEST_TOO_BIG_QUANTITY);
-    Map<Long, String> errors = cartService.update(cart, products);
+    Map<Long, String> errors = new HashMap<>();
+    cartService.update(cart, products, errors);
     assertFalse(errors.isEmpty());
   }
 

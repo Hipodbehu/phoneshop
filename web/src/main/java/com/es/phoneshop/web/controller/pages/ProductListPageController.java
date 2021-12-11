@@ -41,7 +41,7 @@ public class ProductListPageController {
     model.addAttribute(PHONES_PAGE_NUMBER_ATTRIBUTE, countOfPages);
     model.addAttribute(PAGE_NUMBER_ATTRIBUTE, pageNum);
     model.addAttribute(PHONES_ATTRIBUTE,
-            productDao.findAll(query, order, orderDirection, (pageNum - 1) * 10, PRODUCT_LIMIT));
+            productDao.findAll(query, order, orderDirection, (pageNum - 1) * PRODUCT_LIMIT, PRODUCT_LIMIT));
     return PRODUCT_LIST_PAGE;
   }
 
@@ -61,7 +61,7 @@ public class ProductListPageController {
 
   private Integer getPageNumber(String pageNumber, int countOfPages) {
     int result = 1;
-    if (StringUtils.isEmpty(pageNumber)) {
+    if (!StringUtils.isEmpty(pageNumber)) {
       try {
         result = Integer.parseInt(pageNumber);
         if (result > countOfPages) {

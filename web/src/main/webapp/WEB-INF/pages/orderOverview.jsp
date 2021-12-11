@@ -79,6 +79,7 @@
                 <p><spring:message code="orderOverview.lastName"/> ${order.lastName}</p>
                 <p><spring:message code="orderOverview.address"/> ${order.deliveryAddress}</p>
                 <p><spring:message code="orderOverview.phone"/> ${order.contactPhoneNo}</p>
+                <p>${order.comment}</p>
             </form>
         </div>
     </form:form>

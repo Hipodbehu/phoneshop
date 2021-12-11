@@ -3,6 +3,7 @@ package com.es.core.order;
 import com.es.core.model.order.Order;
 import com.es.core.model.order.OrderItem;
 import com.es.core.model.phone.Phone;
+import com.es.core.model.product.ProductNotFoundException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -71,7 +72,7 @@ public class JdbcOrderDao implements OrderDao {
               new BeanPropertyRowMapper<>(OrderItem.class), order.getSecureId());
       orderItems.stream()
               .forEach(orderItem -> {
-                orderItem.setPhone(findPhone(order.getSecureId()));
+                orderItem.setPhone(findPhone(order.getSecureId()).orElseThrow(ProductNotFoundException::new));
                 orderItem.setOrder(order);
               });
     } finally {
@@ -80,17 +81,17 @@ public class JdbcOrderDao implements OrderDao {
     return orderItems;
   }
 
-  private Phone findPhone(String id) {
+  private Optional<Phone> findPhone(String id) {
     readWriteLock.readLock().lock();
-    Phone phone;
+    Optional<Phone> optionalPhone;
     try {
       List<Phone> phones = jdbcTemplate.query(SELECT_PHONE_BY_ID,
               new BeanPropertyRowMapper<>(Phone.class), id);
-      phone = phones.get(0);
+      optionalPhone = phones.isEmpty() ? Optional.empty() : Optional.ofNullable(phones.get(0));
     } finally {
       readWriteLock.readLock().unlock();
     }
-    return phone;
+    return optionalPhone;
   }
 
   @Override

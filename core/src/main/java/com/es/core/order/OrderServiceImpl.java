@@ -10,7 +10,6 @@ import com.es.core.model.product.ProductNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -45,29 +44,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void placeOrder(Order order, Map<String, String> errors) {
+    public void placeOrder(Order order) throws OutOfStockException {
         lock.lock();
         try {
-            order.getOrderItems().forEach(orderItem -> {
-                Stock stock = productDao.getStock(orderItem.getPhone().getId())
-                        .orElseThrow(ProductNotFoundException::new);
-                if (orderItem.getQuantity() > stock.getStock() - stock.getReserved()) {
-                    errors.put(String.valueOf(orderItem.getPhone().getId()), LESS_STOCK_MESSAGE);
-                }
-            });
-            if (errors.isEmpty()) {
-                order.getOrderItems().forEach(orderItem -> {
-                    Stock stock = productDao.getStock(orderItem.getPhone().getId())
-                            .orElseThrow(ProductNotFoundException::new);
-                    stock.setReserved(stock.getReserved() + orderItem.getQuantity());
-                    productDao.updateStock(stock);
-                });
-                order.setSecureId(UUID.randomUUID().toString());
-                orderDao.save(order);
-                order.setStatus(OrderStatus.NEW);
-            } else {
-                order.setStatus(OrderStatus.REJECTED);
+          for (OrderItem orderItem : order.getOrderItems()) {
+            Stock stock = productDao.getStock(orderItem.getPhone().getId())
+                    .orElseThrow(ProductNotFoundException::new);
+            if (orderItem.getQuantity() > stock.getStock() - stock.getReserved()) {
+              throw new OutOfStockException();
             }
+          }
+          order.getOrderItems().forEach(orderItem -> {
+            Stock stock = productDao.getStock(orderItem.getPhone().getId())
+                    .orElseThrow(ProductNotFoundException::new);
+            stock.setReserved(stock.getReserved() + orderItem.getQuantity());
+            productDao.updateStock(stock);
+          });
+          order.setSecureId(UUID.randomUUID().toString());
+          orderDao.save(order);
+          order.setStatus(OrderStatus.NEW);
         } finally {
             lock.unlock();
         }
@@ -76,6 +71,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order getOrder(String id) {
         Order order = orderDao.find(id).orElseThrow(OrderNotFoundException::new);
+        order.setTotalPrice(order.getSubtotal().add(order.getDeliveryPrice()));
         return order;
     }
 }

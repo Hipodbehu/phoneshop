@@ -2,6 +2,7 @@ package com.es.core.model.order;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 public class Order
 {
@@ -21,6 +22,7 @@ public class Order
     private String lastName;
     private String deliveryAddress;
     private String contactPhoneNo;
+    private String comment;
 
     private OrderStatus status;
 
@@ -96,11 +98,32 @@ public class Order
         this.contactPhoneNo = contactPhoneNo;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     public OrderStatus getStatus() {
         return status;
     }
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Order order = (Order) o;
+        return Objects.equals(secureId, order.secureId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(secureId);
     }
 }

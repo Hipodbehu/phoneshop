@@ -10,7 +10,7 @@
             <spring:message code="order.back"/>
         </a>
     </div>
-    <form:form method="post">
+    <form:form method="post" commandName="userInfoWrapper">
         <div>
             <table class="table table-light table-bordered">
                 <tr>
@@ -37,7 +37,6 @@
                         <td>${orderItem.phone.displaySizeInches}"</td>
                         <td>
                                 ${orderItem.quantity}
-                            <div style="color: red">${errors[orderItem.phone.id]}</div>
                         </td>
                         <td>$ ${orderItem.phone.price}</td>
                     </tr>
@@ -79,19 +78,27 @@
                     </td>
                 </tr>
             </table>
-            <form>
-                <p><spring:message code="order.firstName"/> <input name="firstName"></p>
-                <div style="color: red">${errors["firstName"]}</div>
-                <p><spring:message code="order.lastName"/> <input name="lastName"></p>
-                <div style="color: red">${errors["lastName"]}</div>
-                <p><spring:message code="order.address"/> <input name="address"></p>
-                <div style="color: red">${errors["address"]}</div>
-                <p><spring:message code="order.phone"/> <input name="phone"></p>
-                <div style="color: red">${errors["phone"]}</div>
-                <button class="btn btn-primary" type="submit">
-                    <spring:message code="main.order"/>
-                </button>
-            </form>
+            <div style="color: red">${error}</div>
+            <c:set var="firstName"><spring:message code="order.firstName"/></c:set>
+            <c:set var="lastName"><spring:message code="order.lastName"/></c:set>
+            <c:set var="address"><spring:message code="order.address"/></c:set>
+            <c:set var="phone"><spring:message code="order.phone"/></c:set>
+            <table>
+                <thead>
+                <tags:orderFormRow label="${firstName}" name="firstName"/>
+                <tags:orderFormRow label="${lastName}" name="lastName"/>
+                <tags:orderFormRow label="${address}" name="address"/>
+                <tags:orderFormRow label="${phone}" name="phone"/>
+                </thead>
+            </table>
+            <div>
+                <form:textarea path="comment"/>
+                <br/>
+                <form:errors path="comment" cssStyle="color: red"/>
+            </div>
+            <button class="btn btn-primary" type="submit">
+                <spring:message code="main.order"/>
+            </button>
         </div>
     </form:form>
 </tags:master>

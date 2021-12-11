@@ -1,6 +1,5 @@
 function addToCart(phoneId) {
     var quantity = $('#quantity-' + phoneId).val();
-    var addButtonId = '#addButton-' + phoneId;
     var quantityMessageId = '#quantityMessage-' + phoneId;
     var id = phoneId;
     var addProductInput = {};
