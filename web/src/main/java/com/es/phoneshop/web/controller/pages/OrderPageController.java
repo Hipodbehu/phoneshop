@@ -49,11 +49,7 @@ public class OrderPageController {
             model.addAttribute(ORDER_ATTRIBUTE, order);
             page = ORDER_PAGE;
         } else {
-            order.setFirstName(userInfoWrapper.getFirstName());
-            order.setLastName(userInfoWrapper.getLastName());
-            order.setDeliveryAddress(userInfoWrapper.getAddress());
-            order.setContactPhoneNo(userInfoWrapper.getPhone());
-            order.setComment(userInfoWrapper.getComment());
+            setUserInfo(userInfoWrapper, order);
             try {
                 orderService.placeOrder(order);
                     cartService.clear(session);
@@ -65,5 +61,13 @@ public class OrderPageController {
             }
         }
         return page;
+    }
+
+    private void setUserInfo(UserInfoWrapper userInfoWrapper, Order order) {
+        order.setFirstName(userInfoWrapper.getFirstName());
+        order.setLastName(userInfoWrapper.getLastName());
+        order.setDeliveryAddress(userInfoWrapper.getAddress());
+        order.setContactPhoneNo(userInfoWrapper.getPhone());
+        order.setComment(userInfoWrapper.getComment());
     }
 }
