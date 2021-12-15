@@ -9,7 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
@@ -24,7 +27,6 @@ import java.util.stream.IntStream;
 public class CartPageController {
   public static final String CART_PAGE = "cart";
   public static final String CART_ATTRIBUTE = "cart";
-  public static final String ERRORS_ATTRIBUTE = "errors";
   public static final String PRODUCT_LIST_WRAPPER_ATTRIBUTE = "productListWrapper";
   public static final String QUANTITY_ERROR_FIELD = "list[%d].quantity";
 

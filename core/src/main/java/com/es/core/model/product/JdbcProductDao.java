@@ -88,12 +88,12 @@ public class JdbcProductDao implements ProductDao {
   }
 
   @Override
-  public List<Phone> findAll(String query, String order, String orderDirection, int offset, int limit) {
+  public List<Phone> findAll(String query, String sort, String sortDirection, int offset, int limit) {
     readWriteLock.readLock().lock();
     List<Phone> phones;
     try {
       query = buildQuery(query);
-      phones = jdbcTemplate.query(String.format(SELECT_ALL_FROM_PHONES_OFFSET_LIMIT, order, orderDirection),
+      phones = jdbcTemplate.query(String.format(SELECT_ALL_FROM_PHONES_OFFSET_LIMIT, sort, sortDirection),
               new BeanPropertyRowMapper<>(Phone.class), query, query, offset, limit);
       phones.forEach(this::setColors);
     } finally {

@@ -3,6 +3,8 @@ package com.es.phoneshop.web.controller.validation;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.Pattern;
+
 public class UserInfoWrapper {
   @NotEmpty(message = "Required")
   private String firstName;
@@ -14,6 +16,7 @@ public class UserInfoWrapper {
   private String address;
 
   @NotEmpty(message = "Required")
+  @Pattern(regexp = "^[+][0-9]{10,30}$", message = "Invalid phone")
   private String phone;
 
   @Length(max = 254)
