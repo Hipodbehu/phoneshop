@@ -4,8 +4,10 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
-<tags:master pageTitle="Cart">
-
+<tags:master pageTitle="Overview">
+    <c:if test="${admin}">
+        <spring:message code="admin.number"/> ${order.id} <spring:message code="admin.status"/> ${order.status}
+    </c:if>
     <form:form method="post">
         <div>
             <table class="table table-light table-bordered">
@@ -84,8 +86,22 @@
         </div>
     </form:form>
     <div>
-        <a class="btn btn-primary" href="<c:url value="/productList"/>">
-            <spring:message code="main.back"/>
+        <a class="btn btn-primary" href="<c:url value="/admin/orders"/>">
+            <spring:message code="admin.back"/>
         </a>
+        <c:if test="${admin}">
+            <form:form method="put">
+                <button class="btn btn-primary" type="submit">
+                    <spring:message code="admin.delivered"/>
+                </button>
+                <input type="hidden" name="status" value="DELIVERED"/>
+            </form:form>
+            <form:form method="put">
+                <button class="btn btn-primary" type="submit">
+                    <spring:message code="admin.rejected"/>
+                </button>
+                <input type="hidden" name="status" value="REJECTED"/>
+            </form:form>
+        </c:if>
     </div>
 </tags:master>

@@ -4,7 +4,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
-<tags:master pageTitle="Cart">
+<tags:master pageTitle="Order">
     <div>
         <a class="btn btn-primary" href="<c:url value="/cart"/>">
             <spring:message code="order.back"/>

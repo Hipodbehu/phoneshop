@@ -10,14 +10,14 @@ import com.es.core.model.product.ProductNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
-    public static final String LESS_STOCK_MESSAGE = "Stock is less";
-
     private final ReentrantLock lock = new ReentrantLock();
 
     @Resource
@@ -47,31 +47,53 @@ public class OrderServiceImpl implements OrderService {
     public void placeOrder(Order order) throws OutOfStockException {
         lock.lock();
         try {
-          for (OrderItem orderItem : order.getOrderItems()) {
-            Stock stock = productDao.getStock(orderItem.getPhone().getId())
-                    .orElseThrow(ProductNotFoundException::new);
-            if (orderItem.getQuantity() > stock.getStock() - stock.getReserved()) {
-              throw new OutOfStockException();
+            for (OrderItem orderItem : order.getOrderItems()) {
+                Stock stock = productDao.getStock(orderItem.getPhone().getId())
+                        .orElseThrow(ProductNotFoundException::new);
+                if (orderItem.getQuantity() > stock.getStock() - stock.getReserved()) {
+                    throw new OutOfStockException();
+                }
             }
-          }
-          order.getOrderItems().forEach(orderItem -> {
-            Stock stock = productDao.getStock(orderItem.getPhone().getId())
-                    .orElseThrow(ProductNotFoundException::new);
-            stock.setReserved(stock.getReserved() + orderItem.getQuantity());
-            productDao.updateStock(stock);
-          });
-          order.setSecureId(UUID.randomUUID().toString());
-          orderDao.save(order);
-          order.setStatus(OrderStatus.NEW);
+            order.getOrderItems().forEach(orderItem -> {
+                Stock stock = productDao.getStock(orderItem.getPhone().getId())
+                        .orElseThrow(ProductNotFoundException::new);
+                stock.setReserved(stock.getReserved() + orderItem.getQuantity());
+                productDao.updateStock(stock);
+            });
+            LocalDateTime localDateTime = LocalDateTime.now();
+            order.setDate(String.join(" ", localDateTime.toLocalDate().toString(),
+                    localDateTime.toLocalTime().toString()));
+            order.setStatus(OrderStatus.NEW);
+            order.setSecureId(UUID.randomUUID().toString());
+            orderDao.save(order);
         } finally {
             lock.unlock();
         }
     }
 
     @Override
-    public Order getOrder(String id) {
+    public Order getOrder(Long id) {
         Order order = orderDao.find(id).orElseThrow(OrderNotFoundException::new);
         order.setTotalPrice(order.getSubtotal().add(order.getDeliveryPrice()));
         return order;
+    }
+
+    @Override
+    public Order getOrderBySecureId(String secureId) {
+        Order order = orderDao.findBySecureId(secureId).orElseThrow(OrderNotFoundException::new);
+        order.setTotalPrice(order.getSubtotal().add(order.getDeliveryPrice()));
+        return order;
+    }
+
+    @Override
+    public List<Order> getOrders() {
+        List<Order> orderList = orderDao.findAll();
+        orderList.forEach(order -> order.setTotalPrice(order.getSubtotal().add(order.getDeliveryPrice())));
+        return orderList;
+    }
+
+    @Override
+    public void updateOrderStatus(Long id, OrderStatus orderStatus) {
+        orderDao.updateStatus(id, orderStatus);
     }
 }

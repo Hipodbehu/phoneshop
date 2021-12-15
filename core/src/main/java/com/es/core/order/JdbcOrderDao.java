@@ -2,6 +2,7 @@ package com.es.core.order;
 
 import com.es.core.model.order.Order;
 import com.es.core.model.order.OrderItem;
+import com.es.core.model.order.OrderStatus;
 import com.es.core.model.phone.Phone;
 import com.es.core.model.product.ProductNotFoundException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -23,11 +24,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Component
 public class JdbcOrderDao implements OrderDao {
-  public static final String SELECT_ORDER_BY_ID = "SELECT * FROM orders WHERE secureId = ?";
+  public static final String SELECT_ORDER_BY_SECURE_ID = "SELECT * FROM orders WHERE secureId = ?";
+  public static final String SELECT_ORDER_BY_ID = "SELECT * FROM orders WHERE id = ?";
+  public static final String SELECT_ALL_ORDERS = "SELECT * FROM orders";
   public static final String SELECT_ORDER_ITEM_BY_ID = "SELECT phones.*, orderItems.orderId, orderItems.quantity " +
           "FROM orderItems JOIN phones ON phones.id = orderItems.phoneId WHERE orderItems.orderId = ?";
   public static final String SELECT_PHONE_BY_ID = "SELECT phones.* FROM phones JOIN orderItems ON " +
           "phones.id = orderItems.phoneId WHERE orderItems.orderId = ?";
+  public static final String UPDATE_ORDER_STATUS = "UPDATE orders SET status = ? WHERE id = ?";
   public static final String INSERT_ORDER_ITEM = "INSERT INTO orderItems(phoneId, orderId, quantity) VALUES (?, ?, ?)";
   public static final String ORDERS_TABLE = "ORDERS";
 
@@ -45,7 +49,7 @@ public class JdbcOrderDao implements OrderDao {
   }
 
   @Override
-  public Optional<Order> find(String id) {
+  public Optional<Order> find(Long id) {
     readWriteLock.readLock().lock();
     Optional<Order> optionalOrder;
     try {
@@ -62,6 +66,40 @@ public class JdbcOrderDao implements OrderDao {
       readWriteLock.readLock().unlock();
     }
     return optionalOrder;
+  }
+
+  @Override
+  public Optional<Order> findBySecureId(String secureId) {
+    readWriteLock.readLock().lock();
+    Optional<Order> optionalOrder;
+    try {
+      List<Order> orderList = jdbcTemplate.query(SELECT_ORDER_BY_SECURE_ID,
+              new BeanPropertyRowMapper<>(Order.class), secureId);
+      if (!orderList.isEmpty()) {
+        Order order = orderList.get(0);
+        order.setOrderItems(findItems(order));
+        optionalOrder = Optional.of(order);
+      } else {
+        optionalOrder = Optional.empty();
+      }
+    } finally {
+      readWriteLock.readLock().unlock();
+    }
+    return optionalOrder;
+  }
+
+  @Override
+  public List<Order> findAll() {
+    readWriteLock.readLock().lock();
+    List<Order> orderList;
+    try {
+      orderList = jdbcTemplate.query(SELECT_ALL_ORDERS,
+              new BeanPropertyRowMapper<>(Order.class));
+      orderList.forEach(order -> order.setOrderItems(findItems(order)));
+    } finally {
+      readWriteLock.readLock().unlock();
+    }
+    return orderList;
   }
 
   private List<OrderItem> findItems(Order order) {
@@ -100,6 +138,16 @@ public class JdbcOrderDao implements OrderDao {
     try {
       addOrder(order);
       addOrderItems(order.getOrderItems());
+    } finally {
+      readWriteLock.writeLock().unlock();
+    }
+  }
+
+  @Override
+  public void updateStatus(Long id, OrderStatus orderStatus) {
+    readWriteLock.writeLock().lock();
+    try {
+      jdbcTemplate.update(UPDATE_ORDER_STATUS, orderStatus.name(), id);
     } finally {
       readWriteLock.writeLock().unlock();
     }
