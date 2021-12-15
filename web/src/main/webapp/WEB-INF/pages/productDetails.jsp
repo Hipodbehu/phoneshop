@@ -69,7 +69,7 @@
                     <td>${phone.frontCameraMegapixels} <spring:message code="main.megapixels"/></td>
                 </tr>
                 <tr>
-                    <th><spring:message code="main.back"/></th>
+                    <th><spring:message code="camera.back"/></th>
                     <td>${phone.backCameraMegapixels} <spring:message code="main.megapixels"/></td>
                 </tr>
             </table>

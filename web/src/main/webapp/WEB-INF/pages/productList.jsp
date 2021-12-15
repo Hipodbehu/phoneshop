@@ -14,21 +14,21 @@
             <tr>
                 <td><spring:message code="main.image"/></td>
                 <td><spring:message code="main.brand"/>
-                    <tags:sortLink order="brand" orderDirection="asc"/>
-                    <tags:sortLink order="brand" orderDirection="desc"/>
+                    <tags:sortLink sort="brand" sortDirection="asc"/>
+                    <tags:sortLink sort="brand" sortDirection="desc"/>
                 </td>
                 <td><spring:message code="main.model"/>
-                    <tags:sortLink order="model" orderDirection="asc"/>
-                    <tags:sortLink order="model" orderDirection="desc"/>
+                    <tags:sortLink sort="model" sortDirection="asc"/>
+                    <tags:sortLink sort="model" sortDirection="desc"/>
                 </td>
                 <td><spring:message code="main.colors"/></td>
                 <td><spring:message code="main.displaySize"/>
-                    <tags:sortLink order="displaySizeInches" orderDirection="asc"/>
-                    <tags:sortLink order="displaySizeInches" orderDirection="desc"/>
+                    <tags:sortLink sort="display_size" sortDirection="asc"/>
+                    <tags:sortLink sort="display_size" sortDirection="desc"/>
                 </td>
                 <td><spring:message code="main.price"/>
-                    <tags:sortLink order="price" orderDirection="asc"/>
-                    <tags:sortLink order="price" orderDirection="desc"/>
+                    <tags:sortLink sort="price" sortDirection="asc"/>
+                    <tags:sortLink sort="price" sortDirection="desc"/>
                 </td>
                 <td><spring:message code="main.quantity"/></td>
                 <td><spring:message code="main.action"/></td>

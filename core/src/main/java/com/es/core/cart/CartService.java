@@ -15,7 +15,9 @@ public interface CartService {
    * @param items key: {@link com.es.core.model.phone.Phone#id}
    *              value: quantity
    */
-  void update(Cart cart, Map<Long, Integer> items, Map<Long, String> errors);
+  void update(Cart cart, Map<Long, Integer> items) throws OutOfStockException;
+
+  void clear(HttpSession session);
 
   void remove(Cart cart, Long phoneId);
 }

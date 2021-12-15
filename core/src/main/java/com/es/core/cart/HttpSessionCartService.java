@@ -4,12 +4,13 @@ import com.es.core.model.phone.Stock;
 import com.es.core.model.product.ProductDao;
 import com.es.core.model.product.ProductNotFoundException;
 import com.es.core.order.OutOfStockException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,17 +21,14 @@ import java.util.stream.Collectors;
 @Service
 public class HttpSessionCartService implements CartService {
   public static final String CART_SESSION_ATTRIBUTE = HttpSessionCartService.class.getName() + ".cart";
-  public static final String LESS_STOCK_MESSAGE = "Stock is less";
+
+  private final ReentrantLock lock = new ReentrantLock();
 
   @Resource
   private ProductDao productDao;
 
-  private ReentrantLock lock;
-
-  @PostConstruct
-  private void init() {
-    lock = new ReentrantLock();
-  }
+  @Value("${delivery.price}")
+  private BigDecimal deliveryPrice;
 
   @Override
   public Cart getCart(HttpSession session) {
@@ -40,6 +38,7 @@ public class HttpSessionCartService implements CartService {
       cart = (Cart) session.getAttribute(CART_SESSION_ATTRIBUTE);
       if (cart == null) {
         cart = new Cart();
+        cart.setDeliveryCost(deliveryPrice);
         session.setAttribute(CART_SESSION_ATTRIBUTE, cart);
       }
     } finally {
@@ -57,7 +56,7 @@ public class HttpSessionCartService implements CartService {
         HashMap<Long, Integer> toUpdateMap = new HashMap<>();
         CartItem cartItem = optionalCartItem.get();
         toUpdateMap.put(cartItem.getPhone().getId(), cartItem.getQuantity() + quantity);
-        update(cart, toUpdateMap, new HashMap<>());
+        update(cart, toUpdateMap);
       } else {
         Stock stock = productDao.getStock(phoneId).orElseThrow(ProductNotFoundException::new);
         if (quantity > stock.getStock() - stock.getReserved()) {
@@ -101,7 +100,7 @@ public class HttpSessionCartService implements CartService {
   }
 
   @Override
-  public void update(Cart cart, Map<Long, Integer> items, Map<Long, String> errors) {
+  public void update(Cart cart, Map<Long, Integer> items) throws OutOfStockException {
     lock.lock();
     try {
       List<CartItem> itemList = items.keySet().stream()
@@ -110,20 +109,29 @@ public class HttpSessionCartService implements CartService {
       List<Stock> stocks = items.keySet().stream()
               .map(phoneId -> productDao.getStock(phoneId).orElseThrow(ProductNotFoundException::new))
               .collect(Collectors.toList());
+      List<Long> errorIds = new ArrayList<>();
       for (int i = 0; i < stocks.size(); i++) {
         CartItem cartItem = itemList.get(i);
         Stock stock = stocks.get(i);
         Integer quantity = items.get(cartItem.getPhone().getId());
         if (quantity > stock.getStock() - stock.getReserved()) {
-          errors.put(cartItem.getPhone().getId(), LESS_STOCK_MESSAGE);
+          errorIds.add(cartItem.getPhone().getId());
         } else {
           cartItem.setQuantity(quantity);
           recalculateCart(cart);
         }
       }
+      if (!errorIds.isEmpty()) {
+        throw new OutOfStockException(errorIds);
+      }
     } finally {
       lock.unlock();
     }
+  }
+
+  @Override
+  public void clear(HttpSession session) {
+    session.removeAttribute(CART_SESSION_ATTRIBUTE);
   }
 
   @Override

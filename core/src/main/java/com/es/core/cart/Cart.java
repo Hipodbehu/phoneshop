@@ -16,7 +16,6 @@ public class Cart implements Serializable {
     this.itemList = new ArrayList<>();
     this.totalQuantity = 0;
     this.totalCost = BigDecimal.ZERO;
-    this.deliveryCost = BigDecimal.ZERO;
   }
 
   public List<CartItem> getItemList() {

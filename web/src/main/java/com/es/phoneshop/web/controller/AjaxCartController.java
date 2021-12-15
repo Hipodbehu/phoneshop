@@ -5,7 +5,7 @@ import com.es.core.cart.CartService;
 import com.es.core.order.OutOfStockException;
 import com.es.phoneshop.web.controller.dto.AddPhoneResponseDto;
 import com.es.phoneshop.web.controller.dto.MiniCartDto;
-import com.es.phoneshop.web.controller.validation.AddProductInputWrapper;
+import com.es.phoneshop.web.controller.validation.ProductInputWrapper;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -39,9 +38,8 @@ public class AjaxCartController {
     return createMiniCartDto(cart);
   }
 
-  @ResponseBody
   @RequestMapping(method = RequestMethod.POST)
-  public AddPhoneResponseDto addPhone(@RequestBody @Valid AddProductInputWrapper productInputWrapper,
+  public AddPhoneResponseDto addPhone(@RequestBody @Valid ProductInputWrapper productInputWrapper,
                                       BindingResult bindingResult,
                                       HttpSession session) {
     Cart cart = cartService.getCart(session);
@@ -53,7 +51,7 @@ public class AjaxCartController {
         cartService.addPhone(cart, productInputWrapper.getId(), productInputWrapper.getQuantity());
       } catch (OutOfStockException exception) {
         isSuccessful = false;
-        bindingResult.addError(new ObjectError(AddProductInputWrapper.class.toString(), exception.getMessage()));
+        bindingResult.addError(new ObjectError(ProductInputWrapper.class.toString(), exception.getMessage()));
       }
     }
     return createAddPhoneResponseDto(isSuccessful, cart, bindingResult);
@@ -63,7 +61,7 @@ public class AjaxCartController {
   public AddPhoneResponseDto handleException(HttpSession session) {
     BindException bindException = new BindException(HttpMessageNotReadableException.class,
             HttpMessageNotReadableException.class.toString());
-    bindException.addError(new ObjectError(AddProductInputWrapper.class.toString(), BAD_QUANTITY_MESSAGE));
+    bindException.addError(new ObjectError(ProductInputWrapper.class.toString(), BAD_QUANTITY_MESSAGE));
     return createAddPhoneResponseDto(false, cartService.getCart(session), bindException.getBindingResult());
   }
 

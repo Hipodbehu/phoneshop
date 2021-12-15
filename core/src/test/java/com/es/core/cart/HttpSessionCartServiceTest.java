@@ -87,7 +87,7 @@ public class HttpSessionCartServiceTest {
   }
 
   @Test
-  public void shouldRecalculateTotalCostWhenUpdateItemValid() {
+  public void shouldRecalculateTotalCostWhenUpdateItemValid() throws OutOfStockException {
     HashMap<Long, Integer> products = new HashMap<>();
     products.put(TEST_PHONE_IN_CART_ID, TEST_UPDATE_VALID_QUANTITY);
     BigDecimal expected = cart.getTotalCost().add(BigDecimal.valueOf(TEST_PRICE *
@@ -97,11 +97,12 @@ public class HttpSessionCartServiceTest {
     assertEquals(expected, actual);
   }
 
-  @Test
-  public void shouldNotUpdateAndReturnErrorsWhenUpdateItemInvalid() {
+  @Test(expected = OutOfStockException.class)
+  public void shouldThrowExceptionWhenUpdateItemInvalid() throws OutOfStockException {
     HashMap<Long, Integer> products = new HashMap<>();
     products.put(TEST_PHONE_IN_CART_ID, TEST_TOO_BIG_QUANTITY);
-    Map<Long, String> errors = cartService.update(cart, products);
+    Map<Long, String> errors = new HashMap<>();
+    cartService.update(cart, products);
     assertFalse(errors.isEmpty());
   }
 
