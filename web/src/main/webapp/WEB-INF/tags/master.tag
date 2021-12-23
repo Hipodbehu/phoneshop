@@ -10,7 +10,7 @@
           rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
           crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/resources/js/addToCart.js"></script>
+    <script type="text/javascript" src="${pageContext.servletContext.contextPath}/resources/js/addToCart.js"></script>
 </head>
 <script type="text/javascript">
     $(document).ready(function () {

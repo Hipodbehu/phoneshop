@@ -15,7 +15,7 @@ public class UserController {
   public static final String LOGINED_ATTRIBUTE = "logined";
   public static final String LOGIN_PAGE = "login";
 
-  @RequestMapping(method = RequestMethod.GET)
+  @RequestMapping(method = RequestMethod.GET, value = "/login")
   public String showLoginPage(Model model, Authentication authentication,
                               @RequestParam(value = HAVE_ERROR_PARAM, required = false) Boolean haveError,
                               @RequestParam(value = LOGOUT_PARAM, required = false) Boolean logout) {
