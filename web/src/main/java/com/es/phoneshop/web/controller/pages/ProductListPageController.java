@@ -3,6 +3,7 @@ package com.es.phoneshop.web.controller.pages;
 import com.es.core.model.product.ProductDao;
 import com.es.core.model.product.Sort;
 import com.es.core.model.product.SortDirection;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -25,25 +26,32 @@ public class ProductListPageController {
   public static final String PHONES_PAGE_NUMBER_ATTRIBUTE = "phonesPageNumber";
   public static final String PAGE_NUMBER_ATTRIBUTE = "pageNumber";
   public static final String PRODUCT_LIST_PAGE = "productList";
-  public static final int PRODUCT_LIMIT = 10;
   public static final String DISPLAY_SIZE_INCHES = "displaySizeInches";
+  public static final String LOGINED_ATTRIBUTE = "logined";
+  public static final int PRODUCT_LIMIT = 10;
 
   @Resource
   private ProductDao productDao;
 
   @RequestMapping(method = RequestMethod.GET)
-  public String showProductList(Model model, Locale locale,
+  public String showProductList(Model model, Authentication authentication,
                                 @RequestParam(required = false, defaultValue = DEFAULT_QUERY) String query,
                                 @RequestParam(required = false, defaultValue = DEFAULT_SORT) String sort,
                                 @RequestParam(required = false, defaultValue = DEFAULT_SORT_DIRECTION) String sortDirection,
                                 @RequestParam(required = false, defaultValue = DEFAULT_PAGE_NUMBER) String pageNumber) {
-    Locale.setDefault(locale);
     query = getQuery(query);
     sort = getSort(sort);
     sortDirection = getSortDirection(sortDirection);
     int countOfPhones = productDao.getCount(query);
     int countOfPages = countOfPhones / PRODUCT_LIMIT;
     int pageNum = getPageNumber(pageNumber, countOfPages);
+    boolean logined;
+    if (authentication != null) {
+      logined = authentication.isAuthenticated();
+    } else {
+      logined = false;
+    }
+    model.addAttribute(LOGINED_ATTRIBUTE, logined);
     model.addAttribute(PHONES_PAGE_NUMBER_ATTRIBUTE, countOfPages);
     model.addAttribute(PAGE_NUMBER_ATTRIBUTE, pageNum);
     model.addAttribute(PHONES_ATTRIBUTE,
