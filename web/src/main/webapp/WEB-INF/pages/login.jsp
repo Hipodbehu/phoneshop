@@ -6,7 +6,7 @@
 
 <tags:master pageTitle="Login">
     <div>
-        <c:if test="${not logined}">
+        <c:if test="${not logined and not logout}">
             <p style="color: red"><spring:message code="login.message"/></p>
         </c:if>
         <c:if test="${haveError}">

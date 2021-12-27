@@ -5,6 +5,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
 <tags:master pageTitle="Orders">
+    <h2>${username}</h2>
     <div>
         <table class="table table-light table-bordered">
             <tr>

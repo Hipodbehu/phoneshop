@@ -28,7 +28,7 @@ public class HttpSessionCartService implements CartService {
   private ProductDao productDao;
 
   @Value("${delivery.price}")
-  private BigDecimal deliveryPrice;
+  private String deliveryPrice;
 
   @Override
   public Cart getCart(HttpSession session) {
@@ -38,7 +38,7 @@ public class HttpSessionCartService implements CartService {
       cart = (Cart) session.getAttribute(CART_SESSION_ATTRIBUTE);
       if (cart == null) {
         cart = new Cart();
-        cart.setDeliveryCost(deliveryPrice);
+        cart.setDeliveryCost(BigDecimal.valueOf(Double.parseDouble(deliveryPrice)));
         session.setAttribute(CART_SESSION_ATTRIBUTE, cart);
       }
     } finally {

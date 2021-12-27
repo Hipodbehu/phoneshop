@@ -7,7 +7,6 @@
     http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
     <http auto-config="true" use-expressions="true">
-        <intercept-url pattern="/ajaxCart" access="permitAll()"/>
         <intercept-url pattern="/admin/*" access="hasRole('ROLE_ADMIN')" />
         <form-login login-page="/login" default-target-url="/admin/orders"
                     authentication-failure-url="/login?error=true" />
