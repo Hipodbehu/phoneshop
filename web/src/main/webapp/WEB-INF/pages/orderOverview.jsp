@@ -86,10 +86,15 @@
         </div>
     </form:form>
     <div>
-        <a class="btn btn-primary" href="<c:url value="/admin/orders"/>">
-            <spring:message code="admin.back"/>
-        </a>
+        <c:if test="${not admin}">
+            <a class="btn btn-primary" href="<c:url value="/productList"/>">
+                <spring:message code="main.back"/>
+            </a>
+        </c:if>
         <c:if test="${admin}">
+            <a class="btn btn-primary" href="<c:url value="/admin/orders"/>">
+                <spring:message code="admin.back"/>
+            </a>
             <form:form method="put">
                 <button class="btn btn-primary" type="submit">
                     <spring:message code="admin.delivered"/>
