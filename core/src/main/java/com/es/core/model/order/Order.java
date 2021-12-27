@@ -6,6 +6,7 @@ import java.util.Objects;
 
 public class Order
 {
+    private Long id;
     private String secureId;
     private List<OrderItem> orderItems;
     /**
@@ -18,6 +19,7 @@ public class Order
      */
     private BigDecimal totalPrice;
 
+    private String date;
     private String firstName;
     private String lastName;
     private String deliveryAddress;
@@ -25,6 +27,14 @@ public class Order
     private String comment;
 
     private OrderStatus status;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getSecureId() {
         return secureId;
@@ -64,6 +74,14 @@ public class Order
 
     public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public String getFirstName() {

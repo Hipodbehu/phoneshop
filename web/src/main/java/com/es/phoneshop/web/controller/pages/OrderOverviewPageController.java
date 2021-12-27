@@ -20,7 +20,7 @@ public class OrderOverviewPageController {
 
   @RequestMapping(method = RequestMethod.GET, value = "/{id}")
   public String getOrder(Model model, @PathVariable String id) {
-    model.addAttribute(ORDER_ATTRIBUTE, orderService.getOrder(id));
+    model.addAttribute(ORDER_ATTRIBUTE, orderService.getOrderBySecureId(id));
     return ORDER_OVERVIEW_PAGE;
   }
 }
