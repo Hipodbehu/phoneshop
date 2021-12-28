@@ -37,6 +37,7 @@ public class JdbcProductDao implements ProductDao {
   public static final String DELETE_BY_ID_FROM_PHONES = "DELETE FROM phones WHERE id = ?";
   public static final String SELECT_PHONE_ID_BY_BRAND_AND_MODEL = "SELECT id FROM phones WHERE brand = ? AND model = ?";
   public static final String SELECT_PHONE_BY_ID_FROM_PHONES = "SELECT * FROM phones WHERE id = ?";
+  public static final String SELECT_PHONE_BY_MODEL_FROM_PHONES = "SELECT * FROM phones WHERE model = ?";
   public static final String SELECT_COLOR_BY_PHONE_ID_FROM_COLORS = "SELECT id, code FROM colors " +
           "JOIN phone2color ON phone2color.colorId = colors.id WHERE phone2color.phoneId = ?";
   public static final String SELECT_ALL_FROM_PHONES_OFFSET_LIMIT = "SELECT phones.* FROM phones " +
@@ -72,6 +73,21 @@ public class JdbcProductDao implements ProductDao {
     try {
       List<Phone> phones = jdbcTemplate.query(SELECT_PHONE_BY_ID_FROM_PHONES,
               new BeanPropertyRowMapper<>(Phone.class), id);
+      phone = phones.isEmpty() ? Optional.empty() : Optional.ofNullable(phones.get(0));
+      phone.ifPresent(this::setColors);
+    } finally {
+      readWriteLock.readLock().unlock();
+    }
+    return phone;
+  }
+
+  @Override
+  public Optional<Phone> findByModel(String model) {
+    readWriteLock.readLock().lock();
+    Optional<Phone> phone;
+    try {
+      List<Phone> phones = jdbcTemplate.query(SELECT_PHONE_BY_MODEL_FROM_PHONES,
+              new BeanPropertyRowMapper<>(Phone.class), model);
       phone = phones.isEmpty() ? Optional.empty() : Optional.ofNullable(phones.get(0));
       phone.ifPresent(this::setColors);
     } finally {

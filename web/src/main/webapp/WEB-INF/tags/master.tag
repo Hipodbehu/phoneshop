@@ -27,6 +27,9 @@
                 <a class="btn btn-outline-success" type="submit" id="miniCart"
                    href="<c:url value="/cart"/>"></a>
             </form>
+            <a class="btn btn-outline-success" href="${pageContext.request.contextPath}/quickCart">
+                <spring:message code="main.quickCart"/>
+            </a>
             <c:choose>
                 <c:when test="${logined}">
                     <a href="<c:url value="/security_logout"/>">
